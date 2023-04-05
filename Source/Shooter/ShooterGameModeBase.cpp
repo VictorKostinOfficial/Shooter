@@ -3,3 +3,6 @@
 
 #include "ShooterGameModeBase.h"
 
+AShooterGameModeBase::AShooterGameModeBase(){
+
+}

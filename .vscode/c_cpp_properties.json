@@ -1,0 +1,22 @@
+{
+    "configurations": [
+        {
+            "name": "ShooterEditor Editor Win64 Development (Shooter)",
+            "compilerPath": "C:\\Progs\\VisualStudio\\VC\\Tools\\MSVC\\14.33.31629\\bin\\HostX64\\x64\\cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+			"includePath": [ "${workspaceFolder}\\Plugins\\*", "C:\\${workspaceFolder}\\Source\\*", "${workspaceFolder}\\Intermediate\\*", "${workspaceFolder}\\Engine\\*"],
+            "intelliSenseMode": "msvc-x64",
+            "compileCommands": "C:\\Projects\\UnrealProjects\\Shooter\\Shooter\\.vscode\\compileCommands_Shooter.json"
+        },
+        {
+            "name": "Win32",
+            "compilerPath": "C:\\Progs\\VisualStudio\\VC\\Tools\\MSVC\\14.33.31629\\bin\\HostX64\\x64\\cl.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "msvc-x64",
+            "compileCommands": "C:\\Projects\\UnrealProjects\\Shooter\\Shooter\\.vscode\\compileCommands_Default.json"
+        }
+    ],
+    "version": 4
+}
