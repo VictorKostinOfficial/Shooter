@@ -4,7 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
 #include "ShooterCharacter.generated.h"
+
+class UCameraComponent;
+class USpringArmComponent;
+class UInputMappingContext;
+class UInputAction;
+struct FInputActionValue;
 
 UCLASS()
 class SHOOTER_API AShooterCharacter : public ACharacter
@@ -14,19 +21,36 @@ class SHOOTER_API AShooterCharacter : public ACharacter
 public:
 
 	AShooterCharacter();
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 protected:
 
-	void MoveForward(float Value);
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	void MoveRight(float Value);
+	void Move(const FInputActionValue& Value);
+
+	void Look(const FInputActionValue& Value);
+
+	//void MoveForward(float Value);
+
+	//void MoveRight(float Value);
 
 private:
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-	class USpringArmComponent* CameraBoom;
+	USpringArmComponent* CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-	class UCameraComponent* FollowCamera;
+	UCameraComponent* FollowCamera;
+
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputMappingContext> InputMapping;
+
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputMove;
+	
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputLook;
+
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputJump;
 };
