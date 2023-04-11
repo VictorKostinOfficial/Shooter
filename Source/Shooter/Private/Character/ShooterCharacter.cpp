@@ -4,7 +4,8 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
-#include "EnhancedInputComponent.h" // Plugin for new input system
+// Plugins for new input system
+#include "EnhancedInputComponent.h" 
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "InputAction.h"
@@ -33,22 +34,24 @@ void AShooterCharacter::Move(const FInputActionValue& Value)
 {
 	if (Controller)
 	{
-		const FVector2D InputVector = Value.Get<FVector2D>(); 
-		const FRotator MovementRotation(0, Controller->GetControlRotation().Yaw, 0);
+		const FVector InputVector = Value.Get<FVector>(); 
+		const FVector test = InputVector.RotateAngleAxis(GetControlRotation().Yaw, FVector::UpVector);
 
+		AddMovementInput(test);
+		
 		// Forward/Backward direction
-    	if (InputVector.Y != 0.f)
-    	{
-        	const FVector Direction = MovementRotation.RotateVector(FVector::ForwardVector);
-        	AddMovementInput(Direction, InputVector.Y);
-    	}
+    	//if (InputVector.Y != 0.f)
+    	//{
+        	//const FVector Direction = MovementRotation.RotateVector(FVector::ForwardVector);
+        	//AddMovementInput(Direction, InputVector.Y);
+    	//}
  
-    	// Right/Left direction
-    	if (InputVector.X != 0.f)
-    	{
-        	const FVector Direction = MovementRotation.RotateVector(FVector::RightVector);
-        	AddMovementInput(Direction, InputVector.X);
-    	}
+    	//// Right/Left direction
+    	//if (InputVector.X != 0.f)
+    	//{
+        	//const FVector Direction = MovementRotation.RotateVector(FVector::RightVector);
+        	//AddMovementInput(Direction, InputVector.X);
+    	//}
 	}
 }
 void AShooterCharacter::Look(const FInputActionValue &Value)
@@ -81,26 +84,4 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	Input->BindAction(InputLook.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Look);
 	Input->BindAction(InputJump.LoadSynchronous(), ETriggerEvent::Triggered, this, &ACharacter::Jump);
 
-//	PlayerInputComponent->BindAxis("MoveForward", this, &AShooterCharacter::MoveForward);
-//	PlayerInputComponent->BindAxis("MoveRight", this, &AShooterCharacter::MoveRight);
 }
-
-//void AShooterCharacter::MoveForward(float Value)
-//{
-	//FRotator RotationControl = GetControlRotation();
-	//RotationControl.Pitch = 0.0f;
-	//RotationControl.Roll = 0.0f;
-
-	//AddMovementInput(RotationControl.Vector(), Value);
-//}
-
-//void AShooterCharacter::MoveRight(float Value)
-//{
-	//FRotator RotationControl = GetControlRotation();
-	//RotationControl.Pitch = 0.0f;
-	//RotationControl.Roll = 0.0f;
-
-	//FVector RightVector = FRotationMatrix(RotationControl).GetScaledAxis(EAxis::Y);
-
-	//AddMovementInput(RightVector, Value);
-//}

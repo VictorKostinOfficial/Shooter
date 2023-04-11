@@ -30,10 +30,6 @@ protected:
 
 	void Look(const FInputActionValue& Value);
 
-	//void MoveForward(float Value);
-
-	//void MoveRight(float Value);
-
 private:
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
