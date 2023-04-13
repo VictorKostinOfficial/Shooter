@@ -11,6 +11,8 @@ class UCameraComponent;
 class USpringArmComponent;
 class UInputMappingContext;
 class UInputAction;
+class UWidgetComponent;
+
 struct FInputActionValue;
 
 UCLASS()
@@ -37,6 +39,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* FollowCamera;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UWidgetComponent* OverheadWidget;
 
 	UPROPERTY(EditANywhere, Category = "Enhanced Input")
 	TSoftObjectPtr<UInputMappingContext> InputMapping;
