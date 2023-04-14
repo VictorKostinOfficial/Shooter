@@ -1,0 +1,10 @@
+.cache
+.git
+.vscode
+Content
+DerivedDataCache
+Intermediate
+Platforms
+Saved
+Plugins/MultiplayerSessions/Content
+Plugins/MultiplayerSessions/Intermediate
