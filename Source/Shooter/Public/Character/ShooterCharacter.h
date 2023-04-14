@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-
 #include "ShooterCharacter.generated.h"
 
 class UCameraComponent;
@@ -12,6 +11,7 @@ class USpringArmComponent;
 class UInputMappingContext;
 class UInputAction;
 class UWidgetComponent;
+class UShooterInteractionComponent;
 
 struct FInputActionValue;
 
@@ -32,6 +32,8 @@ protected:
 
 	void Look(const FInputActionValue& Value);
 
+	void PrimaryInteract();
+
 private:
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -39,6 +41,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* FollowCamera;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UShooterInteractionComponent> InteractionComponent;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* OverheadWidget;
@@ -54,4 +59,7 @@ private:
 
 	UPROPERTY(EditANywhere, Category = "Enhanced Input")
 	TSoftObjectPtr<UInputAction> InputJump;
+
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputInteraction;
 };

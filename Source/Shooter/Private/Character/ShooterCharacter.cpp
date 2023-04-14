@@ -5,6 +5,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
 
+// Interaction Component
+#include "Character/ShooterInteractionComponent.h"
+
 // Plugins for new input system
 #include "EnhancedInputComponent.h" 
 #include "EnhancedInputSubsystems.h"
@@ -26,6 +29,8 @@ AShooterCharacter::AShooterCharacter()
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);	
 	FollowCamera->bUsePawnControlRotation = false;
+
+	InteractionComponent = CreateDefaultSubobject<UShooterInteractionComponent>("Interaction Component");
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
@@ -73,6 +78,13 @@ void AShooterCharacter::Look(const FInputActionValue &Value)
 			AddControllerPitchInput(InputVector.Y);
 	}
 }
+void AShooterCharacter::PrimaryInteract()
+{
+	if (InteractionComponent)
+	{
+		InteractionComponent->PrimaryInteract();
+	}
+}
 
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -87,5 +99,5 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	Input->BindAction(InputMove.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Move);
 	Input->BindAction(InputLook.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Look);
 	Input->BindAction(InputJump.LoadSynchronous(), ETriggerEvent::Triggered, this, &ACharacter::Jump);
-
+	Input->BindAction(InputInteraction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::PrimaryInteract);
 }
