@@ -12,6 +12,8 @@ class UInputMappingContext;
 class UInputAction;
 class UWidgetComponent;
 class UShooterInteractionComponent;
+class UShooterWeaponComponent;
+//class AWeaponBase;
 
 struct FInputActionValue;
 
@@ -23,6 +25,10 @@ class SHOOTER_API AShooterCharacter : public ACharacter
 public:
 
 	AShooterCharacter();
+	virtual void PostInitializeComponents() override;
+
+	//UPROPERTY(EditAnywhere, Category = "_Weapon")
+	//TObjectPtr<AWeaponBase> Weapon;
 
 protected:
 
@@ -34,8 +40,16 @@ protected:
 
 	void PrimaryInteract();
 
+	void PrimaryShoot();
+
 private:
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UWidgetComponent* OverheadWidget;
+
+
+
+	// Character components
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
 
@@ -44,10 +58,13 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UShooterInteractionComponent> InteractionComponent;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UWidgetComponent* OverheadWidget;
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UShooterWeaponComponent> WeaponComponent;
+
+
+
+	// User Input Actions
 	UPROPERTY(EditANywhere, Category = "Enhanced Input")
 	TSoftObjectPtr<UInputMappingContext> InputMapping;
 
@@ -62,4 +79,8 @@ private:
 
 	UPROPERTY(EditANywhere, Category = "Enhanced Input")
 	TSoftObjectPtr<UInputAction> InputInteraction;
+
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputShoot;
+
 };

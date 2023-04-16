@@ -1,5 +1,7 @@
 #include "Weapon/WeaponBase.h"
 #include "Components/SphereComponent.h"
+#include "Character/ShooterCharacter.h"
+#include "Net/UnrealNetwork.h"
 
 AWeaponBase::AWeaponBase()
 {
@@ -10,26 +12,49 @@ AWeaponBase::AWeaponBase()
 	WeaponMesh->SetupAttachment(RootComponent);
 	SetRootComponent(WeaponMesh);
 
-	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
-	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
-	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// Set WorldDynamic obj type
+	WeaponMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 
-	AreaSphere = CreateDefaultSubobject<USphereComponent>(TEXT("AreaSphere"));
-	AreaSphere->SetupAttachment(RootComponent);
-	AreaSphere->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-	AreaSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	// Ignor all collision responses
+	WeaponMesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	WeaponMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
+
+ 	// Enabled to QueryOnly
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
 }
 
 void AWeaponBase::Interact_Implementation(APawn *InstigatorPawn)
 {
+
+	AShooterCharacter* InstigatorCharacter = Cast<AShooterCharacter>(InstigatorPawn);
+	
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(
 			-1,
 			15.0f,
 			FColor::Yellow,
-			FString(TEXT("Interact weapon"))
+			FString(TEXT("" + InstigatorPawn->GetName() + ": Interact weapon"))
 		);
+	}
+
+	//GEngine->AddOnScreenDebugMessage(-1,15.0f,FColor::Green,FString::Printf(TEXT("Find executed in %f secons."), stop-start));
+
+	WeaponState = EWeaponState::EWS_Equipped;
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//InstigatorCharacter->Weapon = this;
+	this->AttachToComponent(InstigatorCharacter->GetMesh(),FAttachmentTransformRules::SnapToTargetNotIncludingScale, "hand_rSocket"); 
+}
+
+void AWeaponBase::OnRep_WeaponState()
+{
+	switch(WeaponState)
+	{
+		case EWeaponState::EWS_Equipped:
+			WeaponState = EWeaponState::EWS_Equipped;
+			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			break;
 	}
 }
 
@@ -37,12 +62,6 @@ void AWeaponBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (HasAuthority()) //(GetLocalRole() == ENetRole::ROLE_Authority) 
-	{
-		AreaSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		AreaSphere->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Overlap);
-	}
-	
 }
 
 void AWeaponBase::Tick(float DeltaTime)
@@ -51,3 +70,9 @@ void AWeaponBase::Tick(float DeltaTime)
 
 }
 
+void AWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const 
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AWeaponBase, WeaponState);
+}

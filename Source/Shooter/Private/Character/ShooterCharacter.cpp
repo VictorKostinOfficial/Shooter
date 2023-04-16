@@ -1,14 +1,16 @@
 #include "Character/ShooterCharacter.h"
 
+// Components
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
 
-// Interaction Component
 #include "Character/ShooterInteractionComponent.h"
+#include "Weapon/ShooterWeaponComponent.h"
+#include "Weapon/WeaponBase.h"
 
-// Plugins for new input system
+// Input systems
 #include "EnhancedInputComponent.h" 
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
@@ -31,12 +33,23 @@ AShooterCharacter::AShooterCharacter()
 	FollowCamera->bUsePawnControlRotation = false;
 
 	InteractionComponent = CreateDefaultSubobject<UShooterInteractionComponent>("Interaction Component");
+	WeaponComponent = CreateDefaultSubobject<UShooterWeaponComponent>("Weapon Component");
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	bUseControllerRotationYaw = false;
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);
+
+
+}
+void AShooterCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (WeaponComponent)
+	{
+
+	}
 }
 
 void AShooterCharacter::Move(const FInputActionValue& Value)
@@ -86,6 +99,24 @@ void AShooterCharacter::PrimaryInteract()
 	}
 }
 
+void AShooterCharacter::PrimaryShoot()
+{
+	if (WeaponComponent->GetEquippedWeapon() == nullptr)
+	{
+		return;
+	}
+
+
+	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, WeaponComponent->GetEquippedWeapon()->GetName() + " : Shoooooot!");
+
+	//Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "hand_rSocket");
+	////if (CurrentWeapon == nullptr) return;
+
+
+	////APawn* MyPawn = Cast<APawn>(GetOwner());
+	////IShooterWeaponInterface::Execute_Shoot(Cast<AActor>(CurrentWeapon));
+}
+
 void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
@@ -100,4 +131,5 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	Input->BindAction(InputLook.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Look);
 	Input->BindAction(InputJump.LoadSynchronous(), ETriggerEvent::Triggered, this, &ACharacter::Jump);
 	Input->BindAction(InputInteraction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::PrimaryInteract);
+	Input->BindAction(InputShoot.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::PrimaryShoot);
 }

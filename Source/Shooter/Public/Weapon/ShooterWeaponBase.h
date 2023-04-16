@@ -6,12 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "ShooterInteractionInterface.h"
 
-#include "WeaponBase.generated.h"
-
-class USphereComponent;
+#include "ShooterWeaponBase.generated.h"
 
 UENUM(BlueprintType)
-enum class EWeaponState : uint8
+enum class EWeaponState2 : uint8
 {
 	EWS_Initial UMETA(DisplayName = "Initial State"),
 	EWS_Equipped UMETA(DisplayName = "Equipped"),
@@ -21,34 +19,20 @@ enum class EWeaponState : uint8
 };
 
 UCLASS()
-class SHOOTER_API AWeaponBase : public AActor, public IShooterInteractionInterface
+class SHOOTER_API AShooterWeaponBase : public AActor, public IShooterInteractionInterface
 {
 	GENERATED_BODY()
 	
-public:
-	
-	void Interact_Implementation(APawn* InstigatorPawn);
+public:	
 
-	UFUNCTION()
-	void OnRep_WeaponState();
+	void Interact_Implementation(APawn* InstigatorPawn);
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 protected:
 
-	virtual void BeginPlay() override;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "_Weapon")
-	int AmmoMax;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "_Weapon")
-	int AmmoCurrent;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "_Weapon")
-	float ShootDelay;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "_Weapon")
-	float ReloadDelay;
+	UFUNCTION()
+	void OnRep_WeaponState();
 
 private:
 
@@ -56,11 +40,10 @@ private:
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "_Weapon")
-	EWeaponState WeaponState;
+	EWeaponState2 WeaponState;
 
 public:	
-	AWeaponBase();
 
-	virtual void Tick(float DeltaTime) override;
+	AShooterWeaponBase();
 
 };
