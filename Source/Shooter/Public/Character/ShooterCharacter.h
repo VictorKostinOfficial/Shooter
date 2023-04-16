@@ -25,10 +25,10 @@ class SHOOTER_API AShooterCharacter : public ACharacter
 public:
 
 	AShooterCharacter();
-	virtual void PostInitializeComponents() override;
 
-	//UPROPERTY(EditAnywhere, Category = "_Weapon")
-	//TObjectPtr<AWeaponBase> Weapon;
+	bool IsWeaponEquipped();
+
+	bool IsAiming();
 
 protected:
 
@@ -38,7 +38,13 @@ protected:
 
 	void Look(const FInputActionValue& Value);
 
+	void Jumped();
+
+	void Crouched();
+
 	void PrimaryInteract();
+
+	void Aiming();
 
 	void PrimaryShoot();
 
@@ -83,4 +89,9 @@ private:
 	UPROPERTY(EditANywhere, Category = "Enhanced Input")
 	TSoftObjectPtr<UInputAction> InputShoot;
 
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputCrouch;
+
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputAiming;
 };

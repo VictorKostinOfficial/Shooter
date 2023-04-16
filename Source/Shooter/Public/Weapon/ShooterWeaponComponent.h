@@ -17,27 +17,41 @@ class SHOOTER_API UShooterWeaponComponent : public UActorComponent
 
 public:	
 
-	UPROPERTY(BlueprintAssignable, Category = "_Weapon")
-	FOnWeaponChanged OnWeaponChanged;
-
 	UPROPERTY(EditAnywhere, Category = "_Weapon")
 	FName SockedNameToAttach;
 
-	UFUNCTION(BlueprintCallable, Category = "_Weapon")
+	UFUNCTION(BlueprintCallable)
+	void SetIsAiming(bool Value);
+
+	UFUNCTION(BlueprintCallable)
+	bool GetIsAiming();
+
+	UFUNCTION(BlueprintCallable)
 	bool ApplyWeapon(AActor* InstigatorActor, AActor* NewWeapon);
 
-	UFUNCTION(BlueprintCallable, Category = "_Weapon")
+	UFUNCTION(BlueprintCallable)
 	static UShooterWeaponComponent* GetWeaponComponent(AActor* FromActor);
 
-	UFUNCTION(BlueprintCallable, Category = "_Weapon")
+	UFUNCTION(BlueprintCallable)
 	AActor* GetEquippedWeapon();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsWeaponEquipped();
+
 
 protected:
 
-	TObjectPtr<ACharacter> Character;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Replicated, Category = "_Weapon")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "_Weapon")
 	TObjectPtr<AActor> EquippedWeapon;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Replicated, Category = "_Weapon")
+	bool bIsAiming;
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetIsAiming(bool NewValue);
+
+	UPROPERTY(BlueprintAssignable, Category = "_Weapon")
+	FOnWeaponChanged OnWeaponChanged;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_WeaponChanged(AActor* InstigatorActor, AActor* NewWeapon);

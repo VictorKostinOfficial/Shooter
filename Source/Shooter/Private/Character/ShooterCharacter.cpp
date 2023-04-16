@@ -6,9 +6,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/WidgetComponent.h"
 
+// Custom Components
 #include "Character/ShooterInteractionComponent.h"
 #include "Weapon/ShooterWeaponComponent.h"
-#include "Weapon/WeaponBase.h"
 
 // Input systems
 #include "EnhancedInputComponent.h" 
@@ -17,7 +17,9 @@
 #include "InputAction.h"
 #include "InputActionValue.h"
 
+
 #define D(x) if(GEngine){GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, x);}
+
 
 AShooterCharacter::AShooterCharacter()
 {
@@ -36,46 +38,37 @@ AShooterCharacter::AShooterCharacter()
 	WeaponComponent = CreateDefaultSubobject<UShooterWeaponComponent>("Weapon Component");
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	bUseControllerRotationYaw = false;
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);
 
-
 }
-void AShooterCharacter::PostInitializeComponents()
+
+
+void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	Super::PostInitializeComponents();
-	if (WeaponComponent)
-	{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	}
+	APlayerController* PlayerControl = Cast<APlayerController>(GetController());
+	UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerControl->GetLocalPlayer()); // That works
+	InputSystem->ClearAllMappings();
+	InputSystem->AddMappingContext(InputMapping.LoadSynchronous(), 0);
+
+	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	Input->BindAction(InputMove.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Move);
+	Input->BindAction(InputLook.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Look);
+	Input->BindAction(InputJump.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Jumped);
+	Input->BindAction(InputCrouch.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Crouched);
+	Input->BindAction(InputAiming.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Aiming);
+
+	Input->BindAction(InputInteraction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::PrimaryInteract);
+	Input->BindAction(InputShoot.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::PrimaryShoot);
+
 }
 
-void AShooterCharacter::Move(const FInputActionValue& Value)
-{
-	if (Controller)
-	{
-		const FVector InputVector = Value.Get<FVector>(); 
-		const FVector test = InputVector.RotateAngleAxis(GetControlRotation().Yaw, FVector::UpVector);
 
-		AddMovementInput(test);
-		
-		// Forward/Backward direction
-    	//if (InputVector.Y != 0.f)
-    	//{
-        	//const FVector Direction = MovementRotation.RotateVector(FVector::ForwardVector);
-        	//AddMovementInput(Direction, InputVector.Y);
-    	//}
- 
-    	//// Right/Left direction
-    	//if (InputVector.X != 0.f)
-    	//{
-        	//const FVector Direction = MovementRotation.RotateVector(FVector::RightVector);
-        	//AddMovementInput(Direction, InputVector.X);
-    	//}
-	}
-}
 void AShooterCharacter::Look(const FInputActionValue &Value)
 {
 	if (Controller)
@@ -91,6 +84,20 @@ void AShooterCharacter::Look(const FInputActionValue &Value)
 			AddControllerPitchInput(InputVector.Y);
 	}
 }
+
+
+void AShooterCharacter::Jumped()
+{
+	Jump();
+}
+
+
+void AShooterCharacter::Crouched()
+{
+	bIsCrouched ? UnCrouch() : Crouch();
+}
+
+
 void AShooterCharacter::PrimaryInteract()
 {
 	if (InteractionComponent)
@@ -98,6 +105,15 @@ void AShooterCharacter::PrimaryInteract()
 		InteractionComponent->PrimaryInteract();
 	}
 }
+
+void AShooterCharacter::Aiming()
+{
+	if (WeaponComponent != nullptr)
+	{
+		WeaponComponent->GetIsAiming() ? WeaponComponent->SetIsAiming(false) : WeaponComponent->SetIsAiming(true);
+	}
+}
+
 
 void AShooterCharacter::PrimaryShoot()
 {
@@ -109,27 +125,29 @@ void AShooterCharacter::PrimaryShoot()
 
 	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, WeaponComponent->GetEquippedWeapon()->GetName() + " : Shoooooot!");
 
-	//Weapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "hand_rSocket");
-	////if (CurrentWeapon == nullptr) return;
-
-
-	////APawn* MyPawn = Cast<APawn>(GetOwner());
-	////IShooterWeaponInterface::Execute_Shoot(Cast<AActor>(CurrentWeapon));
 }
 
-void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+
+bool AShooterCharacter::IsWeaponEquipped()
 {
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
+    return (WeaponComponent != nullptr && WeaponComponent->IsWeaponEquipped());
+}
 
-	APlayerController* PlayerControl = Cast<APlayerController>(GetController());
-	UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerControl->GetLocalPlayer()); // That works
-	InputSystem->ClearAllMappings();
-	InputSystem->AddMappingContext(InputMapping.LoadSynchronous(), 0);
 
-	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	Input->BindAction(InputMove.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Move);
-	Input->BindAction(InputLook.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Look);
-	Input->BindAction(InputJump.LoadSynchronous(), ETriggerEvent::Triggered, this, &ACharacter::Jump);
-	Input->BindAction(InputInteraction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::PrimaryInteract);
-	Input->BindAction(InputShoot.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::PrimaryShoot);
+bool AShooterCharacter::IsAiming()
+{
+	return (WeaponComponent && WeaponComponent->GetIsAiming());
+}
+
+
+void AShooterCharacter::Move(const FInputActionValue& Value)
+{
+	if (Controller)
+	{
+		const FVector InputVector = Value.Get<FVector>(); 
+		const FVector MoveVector = InputVector.RotateAngleAxis(GetControlRotation().Yaw, FVector::UpVector);
+
+		AddMovementInput(MoveVector);
+		
+	}
 }
