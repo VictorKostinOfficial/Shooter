@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "TurningInPlace.h"
 #include "ShooterAnimInstance.generated.h"
 
 class AShooterCharacter;
@@ -54,6 +55,12 @@ private:
 	
 	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float AO_Pitch;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	FTransform LeftHandTransform;
+
+	UPROPERTY(BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	ETurningInPlace TurningInPlace;
 
 	FRotator CharacterRotationLastFrame;
 	FRotator CharacterRotation;

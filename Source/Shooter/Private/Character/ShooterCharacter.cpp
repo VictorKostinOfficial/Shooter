@@ -22,7 +22,6 @@
 
 #define D(x) if(GEngine){GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, x);}
 
-
 AShooterCharacter::AShooterCharacter()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -48,28 +47,12 @@ AShooterCharacter::AShooterCharacter()
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
-
-	AO_Pitch = 0.f;
-	AO_Yaw = 0.f;
 }
 
 
 void AShooterCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	FRotator AimDirWS = GetWorld()->GetFirstPlayerController()->PlayerCameraManager->GetCameraRotation();
-	AimDirWS = GetBaseAimRotation();
-	const FVector  AimDirLS = ActorToWorld().InverseTransformVectorNoScale( AimDirWS.Vector() );
-	const FRotator AimRotLS = AimDirLS.Rotation();
-	Base = GetBaseAimRotation().Yaw;
-	Camera = AimRotLS.Yaw;
-
-	//float Pitch = AimRotLS.Pitch;
-	//float Yaw   = AimRotLS.Yaw;
-	//float Roll  = AimRotLS.Roll;
-
-	//AimOffset(DeltaTime);
 
 	if (WeaponComponent != nullptr)
 	{
@@ -116,59 +99,6 @@ void AShooterCharacter::Look(const FInputActionValue &Value)
 	}
 }
 
-void AShooterCharacter::AimOffset(float DeltaTime)
-{
-	if (WeaponComponent != nullptr && !WeaponComponent->IsWeaponEquipped()) 
-	{
-		AimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		return;
-	}
-
-	// D(FString::Printf(TEXT("Base: %f"), Base));
-	// D(FString::Printf(TEXT("Camera: %f"), Camera));
-	// D(FString::Printf(TEXT("AO_Yaw: %f"), AO_Yaw));
-	// D(FString::Printf(TEXT("Weapon component: %s,  Equipped Weapon: %d"), WeaponComponent, !WeaponComponent->GetEquippedWeapon()));
-    FVector Velocity = GetVelocity();
-    Velocity.Z = 0.f;
-    float Speed = Velocity.Size();
-	bool bIsInAir = GetCharacterMovement()->IsFalling();
-
-	if (Speed == 0.f && !bIsInAir)
-	{
-
-		FRotator CurrentAimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, AimRotation);
-
-		bUseControllerRotationYaw = false;
-        AO_Yaw = DeltaAimRotation.Yaw;
-
-		if(!IsLocallyControlled())
-		{
-			//D(TEXT("%f"))
-			//D(TEXT("Current Aim Rotation:" + CurrentAimRotation.ToCompactString() + "\nAimRotation: " + AimRotation.ToCompactString() + "\nDelta Aim Rotation: " + DeltaAimRotation.ToCompactString() + " "));
-			//D(FString::Printf(TEXT("Get Base Aim Rot Yaw: %f"), GetBaseAimRotation().Yaw));
-			// D(FString::Printf(TEXT("First: %f"), test));
-		}
-	}
-
-	if (Speed > 0.f || bIsInAir)
-	{
-		AimRotation = FRotator(0.f, GetBaseAimRotation().Yaw, 0.f);
-
-		AO_Yaw = 0.f;
-		bUseControllerRotationYaw = true;
-		//D(FString::Printf(TEXT("SECOND: %f"), AO_Yaw));
-	}
-
-	AO_Pitch = GetBaseAimRotation().Pitch;
-	if (AO_Pitch > 90.f && !IsLocallyControlled())	
-	{
-		AO_Pitch -= 360;
-	}
-
-    // GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, (FString::Printf(TEXT("Yaw: %f \n Pitch: %f"), AO_Yaw, AO_Pitch)));
-}
-
 
 float AShooterCharacter::GetAO_Yaw()
 {
@@ -181,6 +111,13 @@ float AShooterCharacter::GetAO_Pitch()
 {
 	if (WeaponComponent == nullptr) return 0;
     return WeaponComponent->GetAO_Pitch();
+}
+
+
+ETurningInPlace AShooterCharacter::GetTurningInPlace()
+{
+	if (WeaponComponent == nullptr) return ETurningInPlace::ETIP_None;
+    return WeaponComponent->GetTurningInPlace();
 }
 
 
@@ -230,6 +167,30 @@ void AShooterCharacter::PrimaryShoot()
 bool AShooterCharacter::IsWeaponEquipped()
 {
     return (WeaponComponent != nullptr && WeaponComponent->IsWeaponEquipped());
+}
+
+
+AActor* AShooterCharacter::GetEquippedWeapon()
+{
+	if (IsWeaponEquipped()) 
+	{
+		WeaponComponent->GetEquippedWeapon();
+	}
+    return nullptr;
+}
+
+
+FName AShooterCharacter::GetWeaponSocketName()
+{
+	if (WeaponComponent == nullptr) return "";
+    return WeaponComponent->GetWeaponSocketName();
+}
+
+
+USkeletalMeshComponent *AShooterCharacter::GetWeaponSkeletalMeshComponent()
+{
+	if (WeaponComponent == nullptr) return nullptr;
+    return WeaponComponent->GetWeaponSkeletalMeshComponent();
 }
 
 

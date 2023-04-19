@@ -6,6 +6,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Weapon/ShooterWeaponInterface.h"
 
 #define D(x) if(GEngine){GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, x);}
 
@@ -14,6 +15,8 @@ UShooterWeaponComponent::UShooterWeaponComponent()
 
 	PrimaryComponentTick.bCanEverTick = false;
 	SetIsReplicatedByDefault(true);
+
+	TurningInPlace = ETurningInPlace::ETIP_None;
 
 	SockedNameToAttach = "hand_rSocket";
 	bIsAiming = false;
@@ -30,17 +33,6 @@ void UShooterWeaponComponent::BeginPlay()
 	BaseWalkSpeed = Character->GetCharacterMovement()->MaxWalkSpeed;
 }
 
-AActor *UShooterWeaponComponent::GetEquippedWeapon()
-{
-    return EquippedWeapon;
-}
-
-
-bool UShooterWeaponComponent::IsWeaponEquipped()
-{
-    return EquippedWeapon != nullptr;
-}
-
 
 void UShooterWeaponComponent::AimOffset(float DeltaTime)
 {
@@ -49,10 +41,7 @@ void UShooterWeaponComponent::AimOffset(float DeltaTime)
 		AimRotation = FRotator(0.f, Character->GetBaseAimRotation().Yaw, 0.f);
 		return;
 	}
-	// D(FString::Printf(TEXT("Base: %f"), Base));
-	// D(FString::Printf(TEXT("Camera: %f"), Camera));
-	// D(FString::Printf(TEXT("AO_Yaw: %f"), AO_Yaw));
-	// D(FString::Printf(TEXT("Weapon component: %s,  Equipped Weapon: %d"), WeaponComponent, !WeaponComponent->GetEquippedWeapon()));
+
     FVector Velocity = Character->GetVelocity();
     Velocity.Z = 0.f;
     float Speed = Velocity.Size();
@@ -68,13 +57,8 @@ void UShooterWeaponComponent::AimOffset(float DeltaTime)
 		Character->bUseControllerRotationYaw = false;
         LocalYaw = DeltaAimRotation.Yaw;
 
-		//if(!Character->IsLocallyControlled())
-		//{
-			////D(TEXT("%f"))
-			////D(TEXT("Current Aim Rotation:" + CurrentAimRotation.ToCompactString() + "\nAimRotation: " + AimRotation.ToCompactString() + "\nDelta Aim Rotation: " + DeltaAimRotation.ToCompactString() + " "));
-			////D(FString::Printf(TEXT("Get Base Aim Rot Yaw: %f"), GetBaseAimRotation().Yaw));
-			////D(FString::Printf(TEXT("First: %f"), AO_Yaw));
-		//}
+		TurnInPlace(DeltaTime);
+
 	}
 
 	if (Speed > 0.f || bIsInAir)
@@ -83,7 +67,8 @@ void UShooterWeaponComponent::AimOffset(float DeltaTime)
 
 		LocalYaw = 0.f;
 		Character->bUseControllerRotationYaw = true;
-		//D(FString::Printf(TEXT("SECOND: %f"), AO_Yaw));
+
+		TurningInPlace = ETurningInPlace::ETIP_None;
 	}
 
 	// Yaw Rotation doesn't replicated by default with bUseControllerRotationYaw = false
@@ -99,13 +84,48 @@ void UShooterWeaponComponent::AimOffset(float DeltaTime)
 		AO_Pitch -= 360;
 	}
 
-    // GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, (FString::Printf(TEXT("Yaw: %f \n Pitch: %f"), AO_Yaw, AO_Pitch)));
-
 }
+
+
+void UShooterWeaponComponent::TurnInPlace(float DeltaTime)
+{
+	UE_LOG(LogTemp, Warning, TEXT("AO_Yaw: %f"), AO_Yaw);
+	if (AO_Yaw > 90.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Right;
+	}
+	else if (AO_Yaw < -90.f)
+	{
+		TurningInPlace = ETurningInPlace::ETIP_Left;
+	}
+	else
+	{
+		TurningInPlace = ETurningInPlace::ETIP_None;
+	}
+}
+
+
+ETurningInPlace UShooterWeaponComponent::GetTurningInPlace()
+{
+    return TurningInPlace;
+}
+
 
 void UShooterWeaponComponent::Server_SetAO_Yaw_Implementation(float AO_Yaw_New)
 {
 	AO_Yaw = AO_Yaw_New;
+}
+
+
+bool UShooterWeaponComponent::IsWeaponEquipped()
+{
+    return EquippedWeapon != nullptr;
+}
+
+
+AActor *UShooterWeaponComponent::GetEquippedWeapon()
+{
+    return EquippedWeapon;
 }
 
 
@@ -116,12 +136,6 @@ UShooterWeaponComponent *UShooterWeaponComponent::GetWeaponComponent(AActor *Fro
 		return Cast<UShooterWeaponComponent>(FromActor->GetComponentByClass(UShooterWeaponComponent::StaticClass()));
 	}
     return nullptr;
-}
-
-
-bool UShooterWeaponComponent::GetIsAiming()
-{
-	return bIsAiming;
 }
 
 
@@ -138,6 +152,7 @@ bool UShooterWeaponComponent::ApplyWeapon(AActor *NewWeapon)
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 
+		// For Event
 		// Server_EquippedWeapon(NewWeapon);
 		// Multicast_WeaponChanged(InstigatorActor, NewWeapon);
 		return true;
@@ -153,6 +168,38 @@ void UShooterWeaponComponent::OnRep_EquippedWeapon()
 		Character->GetCharacterMovement()->bOrientRotationToMovement = false;
 		Character->bUseControllerRotationYaw = true;
 	}
+
+}
+
+
+FName UShooterWeaponComponent::GetWeaponSocketName()
+{
+	//D("GetWeaponSocketName");
+	if (EquippedWeapon == nullptr) return "";
+	return IShooterWeaponInterface::Execute_GetSocketName(EquippedWeapon);
+}
+
+
+USkeletalMeshComponent* UShooterWeaponComponent::GetWeaponSkeletalMeshComponent()
+{
+	//D("GetWeaponSkeletalMeshComponent");
+	if (EquippedWeapon == nullptr) return nullptr;
+	return IShooterWeaponInterface::Execute_GetSkeletalMeshComponent(EquippedWeapon);
+}
+
+
+EWeaponState UShooterWeaponComponent::GetWeaponState()
+{
+	//D("GetWeaponState");
+	if (EquippedWeapon == nullptr) return EWeaponState::EWS_None;
+	return IShooterWeaponInterface::Execute_GetWeaponState(EquippedWeapon);
+
+}
+
+
+bool UShooterWeaponComponent::GetIsAiming()
+{
+	return bIsAiming;
 }
 
 
@@ -167,13 +214,6 @@ void UShooterWeaponComponent::SetIsAiming(bool Value)
 }
 
 
-// void UShooterWeaponComponent::Server_EquippedWeapon_Implementation(AActor* NewWeapon)
-// {
-	// Character->GetCharacterMovement()->bOrientRotationToMovement = false;
-	// Character->bUseControllerRotationYaw = true;
-// }
-
-
 void UShooterWeaponComponent::Server_SetIsAiming_Implementation(bool Value)
 {
 	bIsAiming = Value;  // Set value on server and client
@@ -185,12 +225,6 @@ void UShooterWeaponComponent::Server_SetIsAiming_Implementation(bool Value)
 }
 
 
-// void UShooterWeaponComponent::Multicast_WeaponChanged_Implementation(AActor *InstigatorActor, AActor *NewWeapon)
-// {
-	// OnWeaponChanged.Broadcast(InstigatorActor, this, NewWeapon);
-// }
-
-
 void UShooterWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -199,3 +233,9 @@ void UShooterWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 	DOREPLIFETIME(UShooterWeaponComponent, bIsAiming);
 	DOREPLIFETIME(UShooterWeaponComponent, AO_Yaw);
 }
+
+
+// void UShooterWeaponComponent::Multicast_WeaponChanged_Implementation(AActor *InstigatorActor, AActor *NewWeapon)
+// {
+	// OnWeaponChanged.Broadcast(InstigatorActor, this, NewWeapon);
+// }

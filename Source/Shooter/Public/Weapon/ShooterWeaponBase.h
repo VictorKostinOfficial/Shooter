@@ -5,29 +5,32 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ShooterInteractionInterface.h"
+#include "ShooterWeaponInterface.h"
 
 #include "ShooterWeaponBase.generated.h"
 
-UENUM(BlueprintType)
-enum class EWeaponState2 : uint8
-{
-	EWS_Initial UMETA(DisplayName = "Initial State"),
-	EWS_Equipped UMETA(DisplayName = "Equipped"),
-	EWS_Dropped UMETA(DisplayName = "Dropped"),
-
-	EWS_MAX UMETA(DisplayName = "DefaultMAX"),
-};
-
 UCLASS()
-class SHOOTER_API AShooterWeaponBase : public AActor, public IShooterInteractionInterface
+class SHOOTER_API AShooterWeaponBase : public AActor, public IShooterInteractionInterface, public IShooterWeaponInterface
 {
 	GENERATED_BODY()
 	
 public:	
 
-	void Interact_Implementation(APawn* InstigatorPawn);
+	UPROPERTY(VisibleAnywhere, Category = "_Weapon")
+	FName LeftHandSocketName;
 
-	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	// WeaponInterface
+	FName GetSocketName_Implementation();
+
+	USkeletalMeshComponent* GetSkeletalMeshComponent_Implementation();
+
+	EWeaponState GetWeaponState_Implementation();
+
+
+
+	// InteractionInterface
+	void Interact_Implementation(APawn* InstigatorPawn);
 
 protected:
 
@@ -35,7 +38,7 @@ protected:
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "_Weapon")
-	EWeaponState2 WeaponState;
+	EWeaponState WeaponState;
 
 	UFUNCTION()
 	void OnRep_WeaponState();
@@ -44,4 +47,5 @@ public:
 
 	AShooterWeaponBase();
 
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

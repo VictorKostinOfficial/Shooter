@@ -16,6 +16,8 @@ AShooterWeaponBase::AShooterWeaponBase()
 	WeaponMesh->SetupAttachment(RootComponent);
 	SetRootComponent(WeaponMesh);
 
+	LeftHandSocketName = "LeftHandSocket";
+
 	// Set WorldDynamic obj type
 	WeaponMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
 
@@ -27,6 +29,25 @@ AShooterWeaponBase::AShooterWeaponBase()
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 }
+
+
+FName AShooterWeaponBase::GetSocketName_Implementation()
+{
+	return LeftHandSocketName;
+}
+
+
+USkeletalMeshComponent* AShooterWeaponBase::GetSkeletalMeshComponent_Implementation()
+{
+	return WeaponMesh;
+}
+
+
+EWeaponState AShooterWeaponBase::GetWeaponState_Implementation()
+{
+	return WeaponState;
+}
+
 
 void AShooterWeaponBase::Interact_Implementation(APawn *InstigatorPawn)
 {
@@ -43,22 +64,24 @@ void AShooterWeaponBase::Interact_Implementation(APawn *InstigatorPawn)
 	{
 		GEngine->AddOnScreenDebugMessage(-1,15.0f,FColor::Green,FString::Printf(TEXT("ShooterWeaponBase Apply Weapon Branch")));
 
-		WeaponState = EWeaponState2::EWS_Equipped;
+		WeaponState = EWeaponState::EWS_Equipped;
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
 }
 
+
 void AShooterWeaponBase::OnRep_WeaponState()
 {
 	switch(WeaponState)
 	{
-		case EWeaponState2::EWS_Equipped:
-			WeaponState = EWeaponState2::EWS_Equipped;
+		case EWeaponState::EWS_Equipped:
+			WeaponState = EWeaponState::EWS_Equipped;
 			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			break;
 	}
 }
+
 
 void AShooterWeaponBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const 
 {

@@ -41,7 +41,7 @@ void AWeaponBase::Interact_Implementation(APawn *InstigatorPawn)
 
 	//GEngine->AddOnScreenDebugMessage(-1,15.0f,FColor::Green,FString::Printf(TEXT("Find executed in %f secons."), stop-start));
 
-	WeaponState = EWeaponState::EWS_Equipped;
+	WeaponState = EWeaponState3::EWS_Equipped;
 	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	//InstigatorCharacter->Weapon = this;
 	this->AttachToComponent(InstigatorCharacter->GetMesh(),FAttachmentTransformRules::SnapToTargetNotIncludingScale, "hand_rSocket"); 
@@ -51,8 +51,8 @@ void AWeaponBase::OnRep_WeaponState()
 {
 	switch(WeaponState)
 	{
-		case EWeaponState::EWS_Equipped:
-			WeaponState = EWeaponState::EWS_Equipped;
+		case EWeaponState3::EWS_Equipped:
+			WeaponState = EWeaponState3::EWS_Equipped;
 			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			break;
 	}

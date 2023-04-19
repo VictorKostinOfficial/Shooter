@@ -11,7 +11,7 @@
 class USphereComponent;
 
 UENUM(BlueprintType)
-enum class EWeaponState : uint8
+enum class EWeaponState3 : uint8
 {
 	EWS_Initial UMETA(DisplayName = "Initial State"),
 	EWS_Equipped UMETA(DisplayName = "Equipped"),
@@ -56,7 +56,7 @@ private:
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "_Weapon")
-	EWeaponState WeaponState;
+	EWeaponState3 WeaponState;
 
 public:	
 	AWeaponBase();

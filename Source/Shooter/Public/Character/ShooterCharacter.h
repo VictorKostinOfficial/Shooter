@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "TurningInPlace.h"
+
 #include "ShooterCharacter.generated.h"
 
 class UCameraComponent;
@@ -13,7 +15,6 @@ class UInputAction;
 class UWidgetComponent;
 class UShooterInteractionComponent;
 class UShooterWeaponComponent;
-//class AWeaponBase;
 
 struct FInputActionValue;
 
@@ -30,13 +31,20 @@ public:
 
 	bool IsWeaponEquipped();
 
-	bool IsAiming();
+	AActor* GetEquippedWeapon();
 
-	void AimOffset(float DeltaTime);
+	FName GetWeaponSocketName();
+
+	USkeletalMeshComponent* GetWeaponSkeletalMeshComponent();
+
+	bool IsAiming();
 
 	float GetAO_Yaw();
 
 	float GetAO_Pitch();
+
+	ETurningInPlace GetTurningInPlace();
+
 
 protected:
 
@@ -55,16 +63,6 @@ protected:
 	void Aiming();
 
 	void PrimaryShoot();
-
-	float Base;
-
-	float Camera;
-
-	float AO_Yaw;
-
-	float AO_Pitch;
-
-	FRotator AimRotation;
 
 private:
 
