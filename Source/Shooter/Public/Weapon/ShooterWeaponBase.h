@@ -31,16 +31,14 @@ public:
 
 protected:
 
-	UFUNCTION()
-	void OnRep_WeaponState();
-
-private:
-
 	UPROPERTY(VisibleAnywhere, Category = "_Weapon")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "_Weapon")
 	EWeaponState2 WeaponState;
+
+	UFUNCTION()
+	void OnRep_WeaponState();
 
 public:	
 

@@ -26,9 +26,17 @@ public:
 
 	AShooterCharacter();
 
+	virtual void Tick(float DeltaTime) override;
+
 	bool IsWeaponEquipped();
 
 	bool IsAiming();
+
+	void AimOffset(float DeltaTime);
+
+	float GetAO_Yaw();
+
+	float GetAO_Pitch();
 
 protected:
 
@@ -48,12 +56,20 @@ protected:
 
 	void PrimaryShoot();
 
+	float Base;
+
+	float Camera;
+
+	float AO_Yaw;
+
+	float AO_Pitch;
+
+	FRotator AimRotation;
+
 private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	UWidgetComponent* OverheadWidget;
-
-
 
 	// Character components
 	UPROPERTY(VisibleAnywhere, Category = Camera)

@@ -39,7 +39,7 @@ void AShooterWeaponBase::Interact_Implementation(APawn *InstigatorPawn)
 
 	UShooterWeaponComponent* WeaponComponent = UShooterWeaponComponent::GetWeaponComponent(InstigatorPawn);
 
-	if(WeaponComponent->ApplyWeapon(InstigatorPawn, this))
+	if(WeaponComponent->ApplyWeapon(this))
 	{
 		GEngine->AddOnScreenDebugMessage(-1,15.0f,FColor::Green,FString::Printf(TEXT("ShooterWeaponBase Apply Weapon Branch")));
 
