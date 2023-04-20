@@ -27,6 +27,8 @@ public:
 
 	AShooterCharacter();
 
+	virtual void PostInitializeComponents() override;
+
 	virtual void Tick(float DeltaTime) override;
 
 	bool IsWeaponEquipped();
@@ -45,6 +47,7 @@ public:
 
 	ETurningInPlace GetTurningInPlace();
 
+	void PlayFireMontage(bool bIsAiming);
 
 protected:
 
@@ -54,15 +57,18 @@ protected:
 
 	void Look(const FInputActionValue& Value);
 
-	void Jumped();
+	virtual void Jump() override;
 
-	void Crouched();
+	void CrouchButtonIsPressed();
+	void UncrouchButtonIsReleased();
 
 	void PrimaryInteract();
 
-	void Aiming();
+	void AimingButtonIsPressed();
+	void AimingButtonIsReleased();
 
-	void PrimaryShoot();
+	void ShootingButtonIsPressed();
+	void ShootingButtonIsReleased();
 
 private:
 

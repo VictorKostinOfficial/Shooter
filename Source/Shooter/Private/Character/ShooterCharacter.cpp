@@ -11,6 +11,7 @@
 // Custom Components
 #include "Character/ShooterInteractionComponent.h"
 #include "Weapon/ShooterWeaponComponent.h"
+#include "Character/ShooterAnimInstance.h"
 
 // Input systems
 #include "EnhancedInputComponent.h" 
@@ -37,6 +38,7 @@ AShooterCharacter::AShooterCharacter()
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+	GetCharacterMovement()->RotationRate = FRotator(0.f, 0.f, 850.f);
 	bUseControllerRotationYaw = false;
 
 	InteractionComponent = CreateDefaultSubobject<UShooterInteractionComponent>("Interaction Component");
@@ -47,6 +49,19 @@ AShooterCharacter::AShooterCharacter()
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
+
+	NetUpdateFrequency = 66.f;
+	MinNetUpdateFrequency = 33.f;
+}
+
+
+void AShooterCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+	if (WeaponComponent)
+	{
+		WeaponComponent->Character = this;
+	}
 }
 
 
@@ -73,12 +88,17 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 	Input->BindAction(InputMove.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Move);
 	Input->BindAction(InputLook.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Look);
-	Input->BindAction(InputJump.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Jumped);
-	Input->BindAction(InputCrouch.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Crouched);
-	Input->BindAction(InputAiming.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::Aiming);
+	Input->BindAction(InputJump.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::Jump);
+	Input->BindAction(InputInteraction.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::PrimaryInteract);
 
-	Input->BindAction(InputInteraction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::PrimaryInteract);
-	Input->BindAction(InputShoot.LoadSynchronous(), ETriggerEvent::Triggered, this, &AShooterCharacter::PrimaryShoot);
+	Input->BindAction(InputCrouch.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::CrouchButtonIsPressed);		// Pressed
+	Input->BindAction(InputCrouch.LoadSynchronous(), ETriggerEvent::Completed, this, &AShooterCharacter::UncrouchButtonIsReleased);	// Released
+
+	Input->BindAction(InputAiming.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::AimingButtonIsPressed);
+	Input->BindAction(InputAiming.LoadSynchronous(), ETriggerEvent::Completed, this, &AShooterCharacter::AimingButtonIsReleased);
+
+	Input->BindAction(InputShoot.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::ShootingButtonIsPressed);
+	Input->BindAction(InputShoot.LoadSynchronous(), ETriggerEvent::Completed, this, &AShooterCharacter::ShootingButtonIsReleased);
 
 }
 
@@ -121,15 +141,9 @@ ETurningInPlace AShooterCharacter::GetTurningInPlace()
 }
 
 
-void AShooterCharacter::Jumped()
+void AShooterCharacter::Jump()
 {
-	Jump();
-}
-
-
-void AShooterCharacter::Crouched()
-{
-	bIsCrouched ? UnCrouch() : Crouch();
+	Super::Jump();
 }
 
 
@@ -141,26 +155,78 @@ void AShooterCharacter::PrimaryInteract()
 	}
 }
 
-void AShooterCharacter::Aiming()
+
+void AShooterCharacter::CrouchButtonIsPressed()
 {
-	if (WeaponComponent != nullptr)
+	D(TEXT("Crouch Pressed"));
+	if (GetMovementComponent()->IsFalling()) return;
+	Super::Crouch();
+}
+void AShooterCharacter::UncrouchButtonIsReleased()
+{
+	D(TEXT("Crouch Released"));
+	Super::UnCrouch();
+}
+
+
+void AShooterCharacter::AimingButtonIsPressed()
+{
+	if (WeaponComponent && WeaponComponent->IsWeaponEquipped())
 	{
-		WeaponComponent->GetIsAiming() ? WeaponComponent->SetIsAiming(false) : WeaponComponent->SetIsAiming(true);
+		D(TEXT("Aiming Pressed"));
+		WeaponComponent->SetIsAiming(true);
+	}
+}
+void AShooterCharacter::AimingButtonIsReleased()
+{
+	if (WeaponComponent && WeaponComponent->IsWeaponEquipped())
+	{
+		D(TEXT("Aiming Released"));
+		WeaponComponent->SetIsAiming(false);
 	}
 }
 
 
-void AShooterCharacter::PrimaryShoot()
+void AShooterCharacter::ShootingButtonIsPressed()
 {
-	if (WeaponComponent->GetEquippedWeapon() == nullptr)
+	if (WeaponComponent && WeaponComponent->IsWeaponEquipped())
 	{
-		D(TEXT("BLYYYY"));
-		return;
+		D(TEXT("Shoot Pressed"));
+		WeaponComponent->SetIsShooting(true);
+		PlayFireMontage(true);
 	}
+}
+void AShooterCharacter::ShootingButtonIsReleased()
+{
+	if (WeaponComponent && WeaponComponent->IsWeaponEquipped())
+	{
+		D(TEXT("Shoot Released"));
+		WeaponComponent->SetIsShooting(false);
+		PlayFireMontage(false);
+	}
+}
 
 
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, WeaponComponent->GetEquippedWeapon()->GetName() + " : Shoooooot!");
+void AShooterCharacter::PlayFireMontage(bool bIsAiming)
+{
+	if (WeaponComponent && WeaponComponent->IsWeaponEquipped())
+	{
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
+		if(AnimInstance && WeaponComponent->FireWeaponMontage)		
+		{
+			if(!bIsAiming)
+			{
+				AnimInstance->Montage_Stop(0.2f, WeaponComponent->FireWeaponMontage);
+				return;
+			}
+
+			AnimInstance->Montage_Play(WeaponComponent->FireWeaponMontage);
+			FName SectionName;
+			SectionName = bIsAiming ? FName("RifleAim") : FName("RifleHip");
+			AnimInstance->Montage_JumpToSection(SectionName);
+		}
+	}
 }
 
 

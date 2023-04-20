@@ -21,7 +21,7 @@ UShooterWeaponComponent::UShooterWeaponComponent()
 	SockedNameToAttach = "hand_rSocket";
 	bIsAiming = false;
 
-	Character = Cast<ACharacter>(GetOwner());
+	// Character = Cast<ACharacter>(GetOwner());
 	AimWalkSpeed = 450.f;
 
 }
@@ -54,8 +54,14 @@ void UShooterWeaponComponent::AimOffset(float DeltaTime)
 		FRotator CurrentAimRotation = FRotator(0.f, Character->GetBaseAimRotation().Yaw, 0.f);
 		FRotator DeltaAimRotation = UKismetMathLibrary::NormalizedDeltaRotator(CurrentAimRotation, AimRotation);
 
-		Character->bUseControllerRotationYaw = false;
-        LocalYaw = DeltaAimRotation.Yaw;
+		// Character->bUseControllerRotationYaw = true;
+		AO_Yaw = DeltaAimRotation.Yaw;
+	
+        // LocalYaw = DeltaAimRotation.Yaw;
+		if (TurningInPlace == ETurningInPlace::ETIP_None)
+		{
+			InterpAO_Yaw = AO_Yaw;
+		}
 
 		TurnInPlace(DeltaTime);
 
@@ -65,17 +71,18 @@ void UShooterWeaponComponent::AimOffset(float DeltaTime)
 	{
 		AimRotation = FRotator(0.f, Character->GetBaseAimRotation().Yaw, 0.f);
 
-		LocalYaw = 0.f;
-		Character->bUseControllerRotationYaw = true;
+		// Character->bUseControllerRotationYaw = true;
+		AO_Yaw = 0.f;
 
+		// LocalYaw = 0.f;
 		TurningInPlace = ETurningInPlace::ETIP_None;
 	}
 
 	// Yaw Rotation doesn't replicated by default with bUseControllerRotationYaw = false
 	if (Character->IsLocallyControlled())
 	{
-		AO_Yaw = LocalYaw;
-		Server_SetAO_Yaw(LocalYaw);
+		// AO_Yaw = LocalYaw;
+		// Server_SetAO_Yaw(LocalYaw);
 	}
 
 	AO_Pitch = Character->GetBaseAimRotation().Pitch;
@@ -87,9 +94,15 @@ void UShooterWeaponComponent::AimOffset(float DeltaTime)
 }
 
 
+void UShooterWeaponComponent::SetIsShooting(bool Value)
+{
+	bIsShooting = Value;
+}
+
+
 void UShooterWeaponComponent::TurnInPlace(float DeltaTime)
 {
-	UE_LOG(LogTemp, Warning, TEXT("AO_Yaw: %f"), AO_Yaw);
+	//UE_LOG(LogTemp, Warning, TEXT("AO_Yaw: %f"), AO_Yaw);
 	if (AO_Yaw > 90.f)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Right;
@@ -98,9 +111,18 @@ void UShooterWeaponComponent::TurnInPlace(float DeltaTime)
 	{
 		TurningInPlace = ETurningInPlace::ETIP_Left;
 	}
-	else
+
+	if (TurningInPlace != ETurningInPlace::ETIP_None)
 	{
-		TurningInPlace = ETurningInPlace::ETIP_None;
+		InterpAO_Yaw = FMath::FInterpTo(InterpAO_Yaw, 0.f, DeltaTime, 4.f);
+
+		AO_Yaw = InterpAO_Yaw;
+
+		if(FMath::Abs(AO_Yaw) < 15.f)
+		{
+			TurningInPlace = ETurningInPlace::ETIP_None;
+			AimRotation = FRotator(0.f, Character->GetBaseAimRotation().Yaw, 0.f);
+		}
 	}
 }
 
@@ -111,10 +133,10 @@ ETurningInPlace UShooterWeaponComponent::GetTurningInPlace()
 }
 
 
-void UShooterWeaponComponent::Server_SetAO_Yaw_Implementation(float AO_Yaw_New)
-{
-	AO_Yaw = AO_Yaw_New;
-}
+// void UShooterWeaponComponent::Server_SetAO_Yaw_Implementation(float AO_Yaw_New)
+// {
+// 	AO_Yaw = AO_Yaw_New;
+// }
 
 
 bool UShooterWeaponComponent::IsWeaponEquipped()
@@ -231,7 +253,7 @@ void UShooterWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 
 	DOREPLIFETIME(UShooterWeaponComponent, EquippedWeapon);
 	DOREPLIFETIME(UShooterWeaponComponent, bIsAiming);
-	DOREPLIFETIME(UShooterWeaponComponent, AO_Yaw);
+	// DOREPLIFETIME(UShooterWeaponComponent, AO_Yaw);
 }
 
 
