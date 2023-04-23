@@ -71,7 +71,9 @@ void AShooterCharacter::Tick(float DeltaTime)
 
 	if (WeaponComponent != nullptr)
 	{
+		FHitResult Hit;
 		WeaponComponent->AimOffset(DeltaTime);
+		// WeaponComponent->TraceCenter(Hit);
 	}
 }
 
@@ -193,7 +195,6 @@ void AShooterCharacter::ShootingButtonIsPressed()
 	{
 		D(TEXT("Shoot Pressed"));
 		WeaponComponent->SetIsShooting(true);
-		PlayFireMontage(true);
 	}
 }
 void AShooterCharacter::ShootingButtonIsReleased()
@@ -202,7 +203,6 @@ void AShooterCharacter::ShootingButtonIsReleased()
 	{
 		D(TEXT("Shoot Released"));
 		WeaponComponent->SetIsShooting(false);
-		PlayFireMontage(false);
 	}
 }
 

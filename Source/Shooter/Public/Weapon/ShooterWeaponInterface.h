@@ -32,7 +32,7 @@ public:
 	+FName GetSocketName();
 	+USkeletalMeshComponent* GetSkeletalMeshComponent();
 	+EWeaponState GetWeaponState();
-	void Shoot();
+	+void Shoot();
 	void Reload();
 	*/
 
@@ -47,5 +47,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	EWeaponState GetWeaponState();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void Shoot(const FVector& HitTarget);
 
 };

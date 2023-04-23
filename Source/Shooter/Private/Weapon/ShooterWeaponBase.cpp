@@ -5,6 +5,8 @@
 #include "Components/SphereComponent.h"
 #include "Weapon/ShooterWeaponComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "Animation/AnimationAsset.h"
+#include "Components/SkeletalMeshComponent.h"
 
 AShooterWeaponBase::AShooterWeaponBase()
 {
@@ -17,6 +19,7 @@ AShooterWeaponBase::AShooterWeaponBase()
 	SetRootComponent(WeaponMesh);
 
 	LeftHandSocketName = "LeftHandSocket";
+	MuzzleSocketName = "MuzzleFlash";
 
 	// Set WorldDynamic obj type
 	WeaponMesh->SetCollisionObjectType(ECollisionChannel::ECC_WorldDynamic);
@@ -49,6 +52,15 @@ EWeaponState AShooterWeaponBase::GetWeaponState_Implementation()
 }
 
 
+void AShooterWeaponBase::Shoot_Implementation(const FVector& HitTarget)
+{
+	if (FireAnimation)
+	{
+		WeaponMesh->PlayAnimation(FireAnimation, false);
+	}
+}
+
+
 void AShooterWeaponBase::Interact_Implementation(APawn *InstigatorPawn)
 {
 	if (!ensure(InstigatorPawn))
@@ -56,13 +68,13 @@ void AShooterWeaponBase::Interact_Implementation(APawn *InstigatorPawn)
 		return;
 	}
 
-	GEngine->AddOnScreenDebugMessage(-1,15.0f,FColor::Green,FString::Printf(TEXT("ShooterWeaponBase interact")));
+	//GEngine->AddOnScreenDebugMessage(-1,15.0f,FColor::Green,FString::Printf(TEXT("ShooterWeaponBase interact")));
 
 	UShooterWeaponComponent* WeaponComponent = UShooterWeaponComponent::GetWeaponComponent(InstigatorPawn);
 
 	if(WeaponComponent->ApplyWeapon(this))
 	{
-		GEngine->AddOnScreenDebugMessage(-1,15.0f,FColor::Green,FString::Printf(TEXT("ShooterWeaponBase Apply Weapon Branch")));
+		//GEngine->AddOnScreenDebugMessage(-1,15.0f,FColor::Green,FString::Printf(TEXT("ShooterWeaponBase Apply Weapon Branch")));
 
 		WeaponState = EWeaponState::EWS_Equipped;
 		WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);

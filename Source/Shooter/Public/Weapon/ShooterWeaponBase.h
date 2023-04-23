@@ -9,6 +9,8 @@
 
 #include "ShooterWeaponBase.generated.h"
 
+class UAnimationAsset;
+
 UCLASS()
 class SHOOTER_API AShooterWeaponBase : public AActor, public IShooterInteractionInterface, public IShooterWeaponInterface
 {
@@ -19,6 +21,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "_Weapon")
 	FName LeftHandSocketName;
 
+	UPROPERTY(VisibleAnywhere, Category = "_Weapon")
+	FName MuzzleSocketName;
+
 
 	// WeaponInterface
 	FName GetSocketName_Implementation();
@@ -26,6 +31,8 @@ public:
 	USkeletalMeshComponent* GetSkeletalMeshComponent_Implementation();
 
 	EWeaponState GetWeaponState_Implementation();
+
+	void Shoot_Implementation(const FVector& HitTarget);
 
 
 
@@ -36,6 +43,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, Category = "_Weapon")
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
+
+	UPROPERTY(EditAnywhere, Category = "_Weapon")
+	TObjectPtr<UAnimationAsset> FireAnimation;
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "_Weapon")
 	EWeaponState WeaponState;

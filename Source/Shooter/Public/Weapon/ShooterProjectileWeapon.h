@@ -6,12 +6,19 @@
 #include "Weapon/ShooterWeaponBase.h"
 #include "ShooterProjectileWeapon.generated.h"
 
-/**
- * 
- */
+class AShooterProjectile;
+
 UCLASS()
 class SHOOTER_API AShooterProjectileWeapon : public AShooterWeaponBase
 {
 	GENERATED_BODY()
+
+public:
+
+	void Shoot_Implementation(const FVector& HitTarget);
 	
+private:
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<AShooterProjectile> ProjectileClass;
 };

@@ -110,6 +110,16 @@ protected:
 
 	void SetIsShooting(bool Value);
 
+	void PlayFireMontage(bool bIsShooting);
+
+	UFUNCTION(Server, Reliable)
+	void Server_Shoot(bool Value, const FVector_NetQuantize TraceHit);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_Shoot(bool Value, const FVector_NetQuantize TraceHit);
+
+	void TraceCenter(FHitResult& TraceHitResult);
+
 	void TurnInPlace(float DeltaTime);
 
 	UFUNCTION(Server, Reliable)

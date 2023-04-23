@@ -7,6 +7,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Weapon/ShooterWeaponInterface.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 
 #define D(x) if(GEngine){GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, x);}
 
@@ -94,9 +96,106 @@ void UShooterWeaponComponent::AimOffset(float DeltaTime)
 }
 
 
+void UShooterWeaponComponent::PlayFireMontage(bool Value)
+{
+	if (Character && EquippedWeapon)
+	{
+		UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+
+		if(AnimInstance && FireWeaponMontage)		
+		{
+			if(!Value)
+			{
+				//D(FString::Printf(TEXT("FIREEE: %s"), GetOwnerRole()==ROLE_Authority ? "S" : "C"));
+				AnimInstance->Montage_Stop(0.2f, FireWeaponMontage);
+				return;
+			}
+
+			AnimInstance->Montage_Play(FireWeaponMontage);
+			FName SectionName;
+			SectionName = Value ? FName("RifleAim") : FName("RifleHip");
+			AnimInstance->Montage_JumpToSection(SectionName);
+		}
+	}
+}
+
+
 void UShooterWeaponComponent::SetIsShooting(bool Value)
 {
 	bIsShooting = Value;
+
+	if (bIsShooting)
+	{
+		FHitResult TraceHit;
+		TraceCenter(TraceHit);
+
+		Server_Shoot(Value, TraceHit.ImpactPoint);
+	}
+}
+
+
+void UShooterWeaponComponent::Server_Shoot_Implementation(bool Value, const FVector_NetQuantize TraceHit)
+{
+	Multicast_Shoot(Value, TraceHit);
+}
+
+
+void UShooterWeaponComponent::Multicast_Shoot_Implementation(bool Value, const FVector_NetQuantize TraceHit)
+{
+	PlayFireMontage(Value);
+	IShooterWeaponInterface::Execute_Shoot(EquippedWeapon, TraceHit);
+
+	// D(FString::Printf(TEXT("FIREEE: %s"), GetOwnerRole()==ROLE_Authority ? "S" : "C"));
+}
+
+
+void UShooterWeaponComponent::TraceCenter(FHitResult& TraceHitResult)
+{
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+
+	FVector2D CrosshairLocation = ViewportSize * 0.5;
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+	bool bIsTraceHit = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLocation,
+		CrosshairWorldPosition,
+		CrosshairWorldDirection
+	);
+
+	if (bIsTraceHit)
+	{
+		FVector End = CrosshairWorldPosition + CrosshairWorldDirection * 80000.f;
+		FCollisionQueryParams Params;
+		Params.AddIgnoredActor(Character);
+
+		GetWorld()->LineTraceSingleByChannel(
+			TraceHitResult,
+			CrosshairWorldPosition,
+			End,
+			ECollisionChannel::ECC_Visibility,
+			Params
+		);
+
+		if (!TraceHitResult.bBlockingHit)
+		{
+			TraceHitResult.ImpactPoint = End;
+		}
+		else
+		{
+			// DrawDebugSphere(
+			// 	GetWorld(),
+			// 	TraceHitResult.ImpactPoint,
+			// 	12.f,
+			// 	12,
+			// 	FColor::Red
+			// );
+		}
+	}
 }
 
 
@@ -163,7 +262,7 @@ UShooterWeaponComponent *UShooterWeaponComponent::GetWeaponComponent(AActor *Fro
 
 bool UShooterWeaponComponent::ApplyWeapon(AActor *NewWeapon)
 {
-	GEngine->AddOnScreenDebugMessage(-1,15.0f,FColor::Green,FString::Printf(TEXT("ShooterWeaponComponent ApplyWeapon")));
+	//GEngine->AddOnScreenDebugMessage(-1,15.0f,FColor::Green,FString::Printf(TEXT("ShooterWeaponComponent ApplyWeapon")));
 	
 	if (GetOwner()->HasAuthority())
 	{
@@ -253,7 +352,7 @@ void UShooterWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 
 	DOREPLIFETIME(UShooterWeaponComponent, EquippedWeapon);
 	DOREPLIFETIME(UShooterWeaponComponent, bIsAiming);
-	// DOREPLIFETIME(UShooterWeaponComponent, AO_Yaw);
+	// DOREPLIFETIME(UShooterWeaponComponent, bIsShooting);
 }
 
 
