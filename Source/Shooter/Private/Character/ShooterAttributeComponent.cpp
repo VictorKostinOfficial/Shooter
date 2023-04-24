@@ -2,6 +2,7 @@
 
 
 #include "Character/ShooterAttributeComponent.h"
+#include "GameMode/ShooterGameModeBase.h"
 #include "Net/UnrealNetwork.h"
 
 #define D(x) if(GEngine){GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, x);}
@@ -80,13 +81,17 @@ bool UShooterAttributeComponent::ApplyHealthChange(AActor *InstigatorActor, floa
 		if (ActualDelta != 0.f)
 		{
 			Multicast_HealthChanged(InstigatorActor, Health, ActualDelta);
-			D(FString::Printf(TEXT("Current Health: %f"), NewHealth));
 		}
 
 		if (ActualDelta < 0.f && Health == 0.f)
 		{
 			// GetOwner()->Destroy();
-			D(TEXT("KILLED"));
+			AShooterGameModeBase* GM = GetWorld()->GetAuthGameMode<AShooterGameModeBase>();
+
+			if (GM)
+			{
+				GM->OnActorKilled(GetOwner(), InstigatorActor);
+			}
 		}
 	}
 
