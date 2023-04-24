@@ -6,6 +6,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
+#include "Character/ShooterAttributeComponent.h"
 
 AShooterProjectile::AShooterProjectile()
 {
@@ -26,6 +27,8 @@ AShooterProjectile::AShooterProjectile()
 	MoveComponent->bInitialVelocityInLocalSpace = true;
 	// MoveComponent->ProjectileGravityScale = 0.f;
 	MoveComponent->InitialSpeed = 15000.f;
+
+	DamageAmount = 50;
 
 	bReplicates = false;
 }
@@ -56,6 +59,16 @@ void AShooterProjectile::BeginPlay()
 
 void AShooterProjectile::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	if (OtherActor && OtherActor != GetInstigator())
+	{
+		bool result = false;
+
+		UShooterAttributeComponent* AttributeComponent = UShooterAttributeComponent::GetAttributes(OtherActor);
+		if (AttributeComponent)
+		{
+			result = AttributeComponent->ApplyHealthChange(GetInstigator(), -DamageAmount);
+		}
+	}
 	Explode();
 }
 

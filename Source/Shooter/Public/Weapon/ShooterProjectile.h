@@ -19,6 +19,8 @@ class SHOOTER_API AShooterProjectile : public AActor
 	
 protected:
 
+	float DamageAmount;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Components")
 	TObjectPtr<UBoxComponent> BoxComponent;
 

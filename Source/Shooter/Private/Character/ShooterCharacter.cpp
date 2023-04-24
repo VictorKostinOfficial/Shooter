@@ -11,6 +11,7 @@
 // Custom Components
 #include "Character/ShooterInteractionComponent.h"
 #include "Weapon/ShooterWeaponComponent.h"
+#include "Character/ShooterAttributeComponent.h"
 #include "Character/ShooterAnimInstance.h"
 
 // Input systems
@@ -43,6 +44,7 @@ AShooterCharacter::AShooterCharacter()
 
 	InteractionComponent = CreateDefaultSubobject<UShooterInteractionComponent>("Interaction Component");
 	WeaponComponent = CreateDefaultSubobject<UShooterWeaponComponent>("Weapon Component");
+	AttributeComponent = CreateDefaultSubobject<UShooterAttributeComponent>("Attribute Component");
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);

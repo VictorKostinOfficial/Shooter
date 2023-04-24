@@ -15,6 +15,7 @@ class UInputAction;
 class UWidgetComponent;
 class UShooterInteractionComponent;
 class UShooterWeaponComponent;
+class UShooterAttributeComponent;
 
 struct FInputActionValue;
 
@@ -70,6 +71,16 @@ protected:
 	void ShootingButtonIsPressed();
 	void ShootingButtonIsReleased();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UShooterInteractionComponent> InteractionComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UShooterWeaponComponent> WeaponComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UShooterAttributeComponent> AttributeComponent;
+
+
 private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -81,12 +92,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* FollowCamera;
-
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UShooterInteractionComponent> InteractionComponent;
-
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UShooterWeaponComponent> WeaponComponent;
 
 
 
