@@ -1,16 +1,13 @@
 # Shooter Project
-____
 
 ![img_1.png](Images/img_1.png)
 
-___
 > **This project is part of my study of Game Development.**
 > 
 > **Engine Version: 5.1.**
 > 
 
 # Project Features (Mix C++ and Blueprint)
-___
 - **Third-person Character Movement** (Using Enhanced Input System)
   - `Input Actions`
   - `Mapping Context Setting Up`
@@ -39,7 +36,7 @@ ___
 ![img.png](Images/Shooter.png)
 > **This project is part of my study of Game Development.**
 # Enhanced Input System
-___
+
 This project uses the new "Enhanced Input System" input system.
 The Enhanced Input Plugin provides developers with an upgrade path and
 backward compatibility from the default input system from Unreal Engine 4 (UE4)
@@ -52,7 +49,6 @@ And this is my Player Input Component
 ![img.png](Images/PlayerInput.png)
 > **This project is part of my study of Game Development.**
 # Used Interfaces
-___
 
 Weapon Interface
 
@@ -64,4 +60,5 @@ Interaction Interface
 > **This project is part of my study of Game Development.**
 
 # Video
-___
+
+[![Watch the video](Images/Shooter.png)](https://youtu.be/x-RbPQhZ0Zg "Shooter Project")
