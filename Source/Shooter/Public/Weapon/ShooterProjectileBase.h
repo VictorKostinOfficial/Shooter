@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "ShooterProjectile.generated.h"
+#include "ShooterProjectileBase.generated.h"
 
 class UBoxComponent;
 class UProjectileMovementComponent;
@@ -12,8 +12,8 @@ class UParticleSystemComponent;
 class UParticleSystem;
 class USoundCue;
 
-UCLASS()
-class SHOOTER_API AShooterProjectile : public AActor
+UCLASS(ABSTRACT)
+class SHOOTER_API AShooterProjectileBase : public AActor
 {
 	GENERATED_BODY()
 	
@@ -47,7 +47,7 @@ protected:
 
 public:	
 
-	AShooterProjectile();
+	AShooterProjectileBase();
 
 	virtual void BeginPlay() override;
 

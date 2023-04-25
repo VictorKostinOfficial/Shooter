@@ -6,7 +6,7 @@
 #include "Weapon/ShooterWeaponBase.h"
 #include "ShooterProjectileWeapon.generated.h"
 
-class AShooterProjectile;
+class AShooterProjectileBase;
 
 UCLASS()
 class SHOOTER_API AShooterProjectileWeapon : public AShooterWeaponBase
@@ -20,5 +20,5 @@ public:
 private:
 
 	UPROPERTY(EditAnywhere)
-	TSubclassOf<AShooterProjectile> ProjectileClass;
+	TSubclassOf<AShooterProjectileBase> ProjectileClass;
 };

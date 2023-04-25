@@ -7,6 +7,7 @@
 #include "ShooterAttributeComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FOnAttributeChanged, AActor*, InstigatorActor, UShooterAttributeComponent*, OwningComp, float, NewValue, float, Delta);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnPlayerDead, AActor*, InstigatorActor, UShooterAttributeComponent*, OwningComp);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SHOOTER_API UShooterAttributeComponent : public UActorComponent
@@ -19,6 +20,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Attribute")
 	FOnAttributeChanged OnHealthChanged;
+
+	UPROPERTY(BlueprintAssignable, Category = "Attribute")
+	FOnPlayerDead OnPlayerDead;
 
 	UFUNCTION(BlueprintCallable, Category = "Attributes")
 	static UShooterAttributeComponent* GetAttributes(AActor* FromActor);
@@ -51,6 +55,9 @@ protected:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_HealthChanged(AActor* InstigatorActor, float NewHealth, float Delta);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayerDead(AActor* InstigatorActor);
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

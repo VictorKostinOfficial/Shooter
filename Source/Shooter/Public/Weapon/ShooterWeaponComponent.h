@@ -38,6 +38,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	EWeaponState GetWeaponState();
 
+	UFUNCTION(BlueprintCallable)
+	void Drop();
+
 
 
 	// Component functions

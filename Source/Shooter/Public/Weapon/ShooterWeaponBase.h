@@ -34,6 +34,8 @@ public:
 
 	void Shoot_Implementation(const FVector& HitTarget);
 
+	void Drop_Implementation();
+
 
 
 	// InteractionInterface

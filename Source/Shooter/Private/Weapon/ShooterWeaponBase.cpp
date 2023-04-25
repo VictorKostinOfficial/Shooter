@@ -60,6 +60,15 @@ void AShooterWeaponBase::Shoot_Implementation(const FVector& HitTarget)
 	}
 }
 
+void AShooterWeaponBase::Drop_Implementation()
+{
+	WeaponState = EWeaponState::EWS_Dropped;
+	WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	//WeaponMesh->DetachFromParent();
+	//SetOwner(nullptr);
+	// WeaponMesh->SetAllBodiesSimulatePhysics(true);
+}
+
 
 void AShooterWeaponBase::Interact_Implementation(APawn *InstigatorPawn)
 {
@@ -90,6 +99,10 @@ void AShooterWeaponBase::OnRep_WeaponState()
 		case EWeaponState::EWS_Equipped:
 			WeaponState = EWeaponState::EWS_Equipped;
 			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			break;
+		case EWeaponState::EWS_Dropped:
+			WeaponState = EWeaponState::EWS_Dropped;
+			WeaponMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 			break;
 	}
 }

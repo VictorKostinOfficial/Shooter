@@ -66,7 +66,8 @@ void AShooterCharacter::PostInitializeComponents()
 	}
 	if (AttributeComponent)
 	{
-		AttributeComponent->OnHealthChanged.AddDynamic(this, &AShooterCharacter::OnHealthChanged);
+		// AttributeComponent->OnHealthChanged.AddDynamic(this, &AShooterCharacter::OnHealthChanged);
+		AttributeComponent->OnPlayerDead.AddDynamic(this, &AShooterCharacter::OnPlayerDead);
 	}
 }
 
@@ -283,15 +284,23 @@ void AShooterCharacter::Move(const FInputActionValue& Value)
 	}
 }
 
-void AShooterCharacter::OnHealthChanged(AActor *InstigatorActor, UShooterAttributeComponent *OwningComp, float NewHealth, float Delta)
+//void AShooterCharacter::OnHealthChanged(AActor *InstigatorActor, UShooterAttributeComponent *OwningComp, float NewHealth, float Delta)
+//{
+//}
+
+void AShooterCharacter::OnPlayerDead(AActor * InstigatorActor, UShooterAttributeComponent * OwningComp)
 {
-	if (NewHealth <= 0.f && Delta < 0.f)
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetAllBodiesSimulatePhysics(true);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	APlayerController* PC = Cast<APlayerController>(GetController());
+	DisableInput(PC);
+
+	if (IsWeaponEquipped())
 	{
-		APlayerController* PC = Cast<APlayerController>(GetController());
-		DisableInput(PC);
-
-		GetMesh()->SetAllBodiesSimulatePhysics(true);
-
-		SetLifeSpan(5.f);
+		WeaponComponent->Drop();
 	}
+
+
+	SetLifeSpan(5.f);
 }

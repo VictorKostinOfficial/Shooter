@@ -80,8 +80,11 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UShooterAttributeComponent> AttributeComponent;
 
+	//UFUNCTION()
+	//void OnHealthChanged(AActor* InstigatorActor, UShooterAttributeComponent* OwningComp, float NewHealth, float Delta);
+
 	UFUNCTION()
-	void OnHealthChanged(AActor* InstigatorActor, UShooterAttributeComponent* OwningComp, float NewHealth, float Delta);
+	void OnPlayerDead(AActor* InstigatorActor, UShooterAttributeComponent* OwningComp);
 
 private:
 

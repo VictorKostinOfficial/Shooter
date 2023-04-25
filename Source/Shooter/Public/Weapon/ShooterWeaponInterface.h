@@ -51,4 +51,6 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void Shoot(const FVector& HitTarget);
 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void Drop();
 };

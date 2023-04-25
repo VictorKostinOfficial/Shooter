@@ -317,6 +317,11 @@ EWeaponState UShooterWeaponComponent::GetWeaponState()
 
 }
 
+void UShooterWeaponComponent::Drop()
+{
+	if(EquippedWeapon == nullptr) return;
+	IShooterWeaponInterface::Execute_Drop(EquippedWeapon);
+}
 
 bool UShooterWeaponComponent::GetIsAiming()
 {
@@ -352,11 +357,4 @@ void UShooterWeaponComponent::GetLifetimeReplicatedProps(TArray<FLifetimePropert
 
 	DOREPLIFETIME(UShooterWeaponComponent, EquippedWeapon);
 	DOREPLIFETIME(UShooterWeaponComponent, bIsAiming);
-	// DOREPLIFETIME(UShooterWeaponComponent, bIsShooting);
 }
-
-
-// void UShooterWeaponComponent::Multicast_WeaponChanged_Implementation(AActor *InstigatorActor, AActor *NewWeapon)
-// {
-	// OnWeaponChanged.Broadcast(InstigatorActor, this, NewWeapon);
-// }

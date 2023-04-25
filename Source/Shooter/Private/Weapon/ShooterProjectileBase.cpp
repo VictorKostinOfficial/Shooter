@@ -1,14 +1,14 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Weapon/ShooterProjectile.h"
+#include "Weapon/ShooterProjectileBase.h"
 #include "Components/BoxComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundCue.h"
 #include "Character/ShooterAttributeComponent.h"
 
-AShooterProjectile::AShooterProjectile()
+AShooterProjectileBase::AShooterProjectileBase()
 {
 
 	PrimaryActorTick.bCanEverTick = false;
@@ -25,16 +25,16 @@ AShooterProjectile::AShooterProjectile()
 	MoveComponent = CreateDefaultSubobject<UProjectileMovementComponent>("ProjectileMoveComponent");
 	MoveComponent->bRotationFollowsVelocity = true;
 	MoveComponent->bInitialVelocityInLocalSpace = true;
-	// MoveComponent->ProjectileGravityScale = 0.f;
+	MoveComponent->ProjectileGravityScale = 0.f;
 	MoveComponent->InitialSpeed = 15000.f;
 
-	DamageAmount = 50;
+	DamageAmount = 30;
 
 	bReplicates = false;
 }
 
 
-void AShooterProjectile::BeginPlay()
+void AShooterProjectileBase::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -52,28 +52,18 @@ void AShooterProjectile::BeginPlay()
 
 	if (HasAuthority())
 	{
-		BoxComponent->OnComponentHit.AddDynamic(this, &AShooterProjectile::OnActorHit);
+		BoxComponent->OnComponentHit.AddDynamic(this, &AShooterProjectileBase::OnActorHit);
 	}
 }
 
 
-void AShooterProjectile::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+void AShooterProjectileBase::OnActorHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-	if (OtherActor && OtherActor != GetInstigator())
-	{
-		bool result = false;
-
-		UShooterAttributeComponent* AttributeComponent = UShooterAttributeComponent::GetAttributes(OtherActor);
-		if (AttributeComponent)
-		{
-			result = AttributeComponent->ApplyHealthChange(GetInstigator(), -DamageAmount);
-		}
-	}
 	Explode();
 }
 
 
-void AShooterProjectile::Explode_Implementation()
+void AShooterProjectileBase::Explode_Implementation()
 {
 	// All hit effects
 	if(ensure(IsValid(this)))	

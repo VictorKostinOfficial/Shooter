@@ -92,6 +92,8 @@ bool UShooterAttributeComponent::ApplyHealthChange(AActor *InstigatorActor, floa
 			{
 				GM->OnActorKilled(GetOwner(), InstigatorActor);
 			}
+
+			Multicast_PlayerDead(InstigatorActor);
 		}
 	}
 
@@ -101,6 +103,11 @@ bool UShooterAttributeComponent::ApplyHealthChange(AActor *InstigatorActor, floa
 void UShooterAttributeComponent::Multicast_HealthChanged_Implementation(AActor *InstigatorActor, float NewHealth, float Delta)
 {
 	OnHealthChanged.Broadcast(InstigatorActor, this, NewHealth, Delta);
+}
+
+void UShooterAttributeComponent::Multicast_PlayerDead_Implementation(AActor* InstigatorActor)
+{
+	OnPlayerDead.Broadcast(InstigatorActor, this);
 }
 
 void UShooterAttributeComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
