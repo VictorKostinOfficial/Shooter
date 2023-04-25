@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ShooterInteractionInterface.h"
+
 #include "WeaponBase.generated.h"
 
 class USphereComponent;
 
 UENUM(BlueprintType)
-enum class EWeaponState : uint8
+enum class EWeaponState3 : uint8
 {
 	EWS_Initial UMETA(DisplayName = "Initial State"),
 	EWS_Equipped UMETA(DisplayName = "Equipped"),
@@ -28,20 +29,34 @@ public:
 	
 	void Interact_Implementation(APawn* InstigatorPawn);
 
+	UFUNCTION()
+	void OnRep_WeaponState();
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 protected:
 
 	virtual void BeginPlay() override;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "_Weapon")
+	int AmmoMax;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "_Weapon")
+	int AmmoCurrent;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "_Weapon")
+	float ShootDelay;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "_Weapon")
+	float ReloadDelay;
+
 private:
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-	USkeletalMeshComponent* WeaponMesh;
+	UPROPERTY(VisibleAnywhere, Category = "_Weapon")
+	TObjectPtr<USkeletalMeshComponent> WeaponMesh;
 
-	UPROPERTY(VisibleAnywhere, Category = "Weapon Properties")
-	USphereComponent* AreaSphere;
-
-	UPROPERTY(VisibleAnywhere)
-	EWeaponState WeaponState;
+	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "_Weapon")
+	EWeaponState3 WeaponState;
 
 public:	
 	AWeaponBase();

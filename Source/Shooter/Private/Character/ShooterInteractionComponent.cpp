@@ -8,9 +8,9 @@ UShooterInteractionComponent::UShooterInteractionComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.TickGroup = TG_PostUpdateWork;
 
-	TraceDistance = 500;
-	TraceRadius = 30;
-	CollisionChannel = ECollisionChannel::ECC_WorldDynamic;
+	TraceDistance = 600;
+	TraceRadius = 50;
+	CollisionChannel = ECollisionChannel::ECC_Visibility;
 }
 
 void UShooterInteractionComponent::BeginPlay()
@@ -47,7 +47,10 @@ void UShooterInteractionComponent::FindBestInteractable()
 	FCollisionShape Shape;
 	Shape.SetSphere(TraceRadius);
 
-	bool bBlockHit = GetWorld()->SweepMultiByObjectType(Hits, EyeLocation, End, FQuat::Identity, ObjectQueryParams, Shape);
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(GetOwner());
+
+	bool bBlockHit = GetWorld()->SweepMultiByChannel(Hits, EyeLocation, End, FQuat::Identity, CollisionChannel, Shape, Params);
 	FColor LineColor = bBlockHit ? FColor::Green : FColor::Red;
 
 	FocusedActor = nullptr;

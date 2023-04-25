@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "TurningInPlace.h"
+
 #include "ShooterCharacter.generated.h"
 
 class UCameraComponent;
@@ -12,6 +14,8 @@ class UInputMappingContext;
 class UInputAction;
 class UWidgetComponent;
 class UShooterInteractionComponent;
+class UShooterWeaponComponent;
+class UShooterAttributeComponent;
 
 struct FInputActionValue;
 
@@ -24,6 +28,28 @@ public:
 
 	AShooterCharacter();
 
+	virtual void PostInitializeComponents() override;
+
+	virtual void Tick(float DeltaTime) override;
+
+	bool IsWeaponEquipped();
+
+	AActor* GetEquippedWeapon();
+
+	FName GetWeaponSocketName();
+
+	USkeletalMeshComponent* GetWeaponSkeletalMeshComponent();
+
+	bool IsAiming();
+
+	float GetAO_Yaw();
+
+	float GetAO_Pitch();
+
+	ETurningInPlace GetTurningInPlace();
+
+	void PlayFireMontage(bool bIsAiming);
+
 protected:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -32,22 +58,49 @@ protected:
 
 	void Look(const FInputActionValue& Value);
 
+	virtual void Jump() override;
+
+	void CrouchButtonIsPressed();
+	void UncrouchButtonIsReleased();
+
 	void PrimaryInteract();
+
+	void AimingButtonIsPressed();
+	void AimingButtonIsReleased();
+
+	void ShootingButtonIsPressed();
+	void ShootingButtonIsReleased();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UShooterInteractionComponent> InteractionComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UShooterWeaponComponent> WeaponComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UShooterAttributeComponent> AttributeComponent;
+
+	//UFUNCTION()
+	//void OnHealthChanged(AActor* InstigatorActor, UShooterAttributeComponent* OwningComp, float NewHealth, float Delta);
+
+	UFUNCTION()
+	void OnPlayerDead(AActor* InstigatorActor, UShooterAttributeComponent* OwningComp);
 
 private:
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UWidgetComponent* OverheadWidget;
+
+	// Character components
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	USpringArmComponent* CameraBoom;
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UShooterInteractionComponent> InteractionComponent;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	UWidgetComponent* OverheadWidget;
 
+
+	// User Input Actions
 	UPROPERTY(EditANywhere, Category = "Enhanced Input")
 	TSoftObjectPtr<UInputMappingContext> InputMapping;
 
@@ -62,4 +115,13 @@ private:
 
 	UPROPERTY(EditANywhere, Category = "Enhanced Input")
 	TSoftObjectPtr<UInputAction> InputInteraction;
+
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputShoot;
+
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputCrouch;
+
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputAiming;
 };
