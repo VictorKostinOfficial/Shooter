@@ -16,6 +16,7 @@ class UWidgetComponent;
 class UShooterInteractionComponent;
 class UShooterWeaponComponent;
 class UShooterAttributeComponent;
+class UShooterActionComponent;
 
 struct FInputActionValue;
 
@@ -71,6 +72,10 @@ protected:
 	void ShootingButtonIsPressed();
 	void ShootingButtonIsReleased();
 
+	void QButtonIsPressed();
+	void EButtonIsPressed();
+	void ZButtonIsPressed();
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UShooterInteractionComponent> InteractionComponent;
 
@@ -79,6 +84,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
 	TObjectPtr<UShooterAttributeComponent> AttributeComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+	TObjectPtr<UShooterActionComponent> ActionComponent;
 
 	//UFUNCTION()
 	//void OnHealthChanged(AActor* InstigatorActor, UShooterAttributeComponent* OwningComp, float NewHealth, float Delta);
@@ -124,4 +132,13 @@ private:
 
 	UPROPERTY(EditANywhere, Category = "Enhanced Input")
 	TSoftObjectPtr<UInputAction> InputAiming;
+
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputQAbility;
+
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputEAbility;
+
+	UPROPERTY(EditANywhere, Category = "Enhanced Input")
+	TSoftObjectPtr<UInputAction> InputZAbility;
 };
