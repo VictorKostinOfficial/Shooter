@@ -12,7 +12,7 @@ class UParticleSystem;
 /**
  * 
  */
-UCLASS()
+UCLASS(Blueprintable)
 class SHOOTER_API UShooterAction_Projectile : public UShooterAction
 {
 	GENERATED_BODY()

@@ -31,11 +31,17 @@ public:
 
 protected:
 
-	UPROPERTY()
+	// UFUNCTION(Server, Reliable)
+	// void ServerStartAction(AActor* Instigator, FName ActionName);
+
+	// UFUNCTION(Server, Reliable)
+	// void ServerStopAction(AActor* Instigator, FName ActionName);
+
+	UPROPERTY(EditAnywhere, Category = "Actions")
 	TArray<TSubclassOf<UShooterAction>> DefaultActions;
 
-	UPROPERTY()
-	TArray<UShooterAction*> Actions;
+	UPROPERTY(BlueprintReadOnly, Replicated)
+	TArray<TObjectPtr<UShooterAction>> Actions;
 
 	virtual void BeginPlay() override;
 

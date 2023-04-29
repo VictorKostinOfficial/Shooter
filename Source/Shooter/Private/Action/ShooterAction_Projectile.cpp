@@ -4,11 +4,14 @@
 #include "Action/ShooterAction_Projectile.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Character.h"
+#include "Net/UnrealNetwork.h"
+
+#define D(x) if(GEngine){GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, x);}
 
 UShooterAction_Projectile::UShooterAction_Projectile()
 {
     StartPointSocketName = "MuzzleFlash";
-    AttackAnimDelay = 0.0f;
+    AttackAnimDelay = 0.1f;
 }
 
 void UShooterAction_Projectile::StartAction_Implementation(AActor *Instigator)
@@ -18,6 +21,7 @@ void UShooterAction_Projectile::StartAction_Implementation(AActor *Instigator)
     ACharacter* Character = Cast<ACharacter>(Instigator);
 	if (Character)
 	{
+		D(TEXT("StartAction_Implementation"));
 		Character->PlayAnimMontage(AttackAnim);
 
         if (CastingEffect)
@@ -37,6 +41,7 @@ void UShooterAction_Projectile::AttackDelay_Elapsed(ACharacter *InstigatorCharac
 {
     if (ensureAlways(ProjectileClass))
 	{
+		D(TEXT("AttackDelay_Elapsed"));
 		FVector HandLocation = InstigatorCharacter->GetMesh()->GetSocketLocation(StartPointSocketName);
 
 		FActorSpawnParameters SpawnParams;

@@ -221,16 +221,19 @@ void AShooterCharacter::ShootingButtonIsReleased()
 void AShooterCharacter::QButtonIsPressed()
 {
 		D(TEXT("Q Pressed"));
+		ActionComponent->StartActionByName(this, "BlackHole");
 }
 
 void AShooterCharacter::EButtonIsPressed()
 {
 		D(TEXT("E Pressed"));
+		ActionComponent->StartActionByName(this, "Dash");
 }
 
 void AShooterCharacter::ZButtonIsPressed()
 {
 		D(TEXT("Z Pressed"));
+		ActionComponent->StartActionByName(this, "Ultimate");
 }
 
 void AShooterCharacter::PlayFireMontage(bool bIsAiming)
@@ -315,6 +318,7 @@ void AShooterCharacter::OnPlayerDead(AActor * InstigatorActor, UShooterAttribute
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	DisableInput(PC);
+	// GetMesh()->SetSimulatePhysics(true); //Change Collieion Object Type to PhysicsBody;
 
 	if (IsWeaponEquipped())
 	{

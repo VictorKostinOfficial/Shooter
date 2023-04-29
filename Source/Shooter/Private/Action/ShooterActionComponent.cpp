@@ -3,6 +3,9 @@
 
 #include "Action/ShooterActionComponent.h"
 #include "Action/ShooterAction.h"
+#include "Net/UnrealNetwork.h"
+
+#define D(x) if(GEngine){GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, x);}
 
 UShooterActionComponent::UShooterActionComponent()
 {
@@ -50,6 +53,7 @@ bool UShooterActionComponent::StartActionByName(AActor *Instigator, FName Action
 	{
 		if (Action && Action->ActionName == ActionName)
 		{
+			D(TEXT(" " + ActionName.ToString() + " "));
 			Action->StartAction(Instigator);
 			return true;
 		}
@@ -70,4 +74,21 @@ bool UShooterActionComponent::StopActionByName(AActor *Instigator, FName ActionN
 	}
 
     return false;
+}
+
+// void UShooterActionComponent::ServerStartAction(AActor *Instigator, FName ActionName)
+// {
+// 	StartActionByName(Instigator, ActionName);
+// }
+
+// void UShooterActionComponent::ServerStopAction(AActor *Instigator, FName ActionName)
+// {
+// 	StopActionByName(Instigator, ActionName);
+// }
+
+void UShooterActionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UShooterActionComponent, Actions);
 }
