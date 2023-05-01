@@ -12,6 +12,7 @@
 #include "Character/ShooterInteractionComponent.h"
 #include "Weapon/ShooterWeaponComponent.h"
 #include "Character/ShooterAttributeComponent.h"
+#include "Action/ShooterActionComponent.h"
 #include "Character/ShooterAnimInstance.h"
 
 // Input systems
@@ -45,6 +46,7 @@ AShooterCharacter::AShooterCharacter()
 	InteractionComponent = CreateDefaultSubobject<UShooterInteractionComponent>("Interaction Component");
 	WeaponComponent = CreateDefaultSubobject<UShooterWeaponComponent>("Weapon Component");
 	AttributeComponent = CreateDefaultSubobject<UShooterAttributeComponent>("Attribute Component");
+	ActionComponent = CreateDefaultSubobject<UShooterActionComponent>("Action Component");
 
 	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
 	OverheadWidget->SetupAttachment(RootComponent);
@@ -109,6 +111,9 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	Input->BindAction(InputShoot.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::ShootingButtonIsPressed);
 	Input->BindAction(InputShoot.LoadSynchronous(), ETriggerEvent::Completed, this, &AShooterCharacter::ShootingButtonIsReleased);
 
+	Input->BindAction(InputQAbility.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::QButtonIsPressed);
+	Input->BindAction(InputEAbility.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::EButtonIsPressed);
+	Input->BindAction(InputZAbility.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::ZButtonIsPressed);
 }
 
 
@@ -213,6 +218,24 @@ void AShooterCharacter::ShootingButtonIsReleased()
 	}
 }
 
+void AShooterCharacter::QButtonIsPressed()
+{
+		D(TEXT("Q Pressed"));
+		ActionComponent->StartActionByName(this, "BlackHole");
+}
+
+void AShooterCharacter::EButtonIsPressed()
+{
+		D(TEXT("E Pressed"));
+		ActionComponent->StartActionByName(this, "Dash");
+}
+
+void AShooterCharacter::ZButtonIsPressed()
+{
+		D(TEXT("Z Pressed"));
+		ActionComponent->StartActionByName(this, "Ultimate");
+}
+
 void AShooterCharacter::PlayFireMontage(bool bIsAiming)
 {
 	if (WeaponComponent && WeaponComponent->IsWeaponEquipped())
@@ -295,6 +318,7 @@ void AShooterCharacter::OnPlayerDead(AActor * InstigatorActor, UShooterAttribute
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	APlayerController* PC = Cast<APlayerController>(GetController());
 	DisableInput(PC);
+	// GetMesh()->SetSimulatePhysics(true); //Change Collieion Object Type to PhysicsBody;
 
 	if (IsWeaponEquipped())
 	{

@@ -28,8 +28,6 @@ AShooterProjectileBase::AShooterProjectileBase()
 	MoveComponent->ProjectileGravityScale = 0.f;
 	MoveComponent->InitialSpeed = 15000.f;
 
-	DamageAmount = 30;
-
 	bReplicates = false;
 }
 

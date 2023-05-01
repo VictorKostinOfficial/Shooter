@@ -22,6 +22,9 @@
   - `Weapon Interface` (Contains the necessary functionality for weapons)
   - Weapon Base Class
   - Projectile Base Class
+- **Action System**
+  - Action Component
+  - Action Base Class
 - **Interaction System**
   - `Interaction Component` (Interaction between the other object and the player)
   - `Interaction Interface` (Contains the necessary functionality for interactable object)
