@@ -4,9 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GameplayTagContainer.h"
 #include "ShooterActionComponent.generated.h"
 
 class UShooterAction;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnActionStateChanged, UShooterActionComponent*, OwningComp, UShooterAction*, Action);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class SHOOTER_API UShooterActionComponent : public UActorComponent
@@ -17,25 +20,39 @@ public:
 
 	UShooterActionComponent();
 
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	UFUNCTION(BlueprintCallable, Category = "Action")
+	void AddAction(AActor* Instigator, TSubclassOf<UShooterAction> ActionClass);
 
 	UFUNCTION(BlueprintCallable, Category = "Action")
-	void AddAction(TSubclassOf<UShooterAction> ActionClass);
+	void RemoveAction(UShooterAction* ActionClass);
 
 	UFUNCTION(BlueprintCallable, Category = "Action")
-	bool StartActionByName(AActor* Instigator, FName ActionName);
+	void StartActionByName(AActor* Instigator, FName ActionName);
 
 	UFUNCTION(BlueprintCallable, Category = "Action")
-	bool StopActionByName(AActor* Instigator, FName ActionName);
+	void StopActionByName(AActor* Instigator, FName ActionName);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Tags")
+	FGameplayTagContainer ActiveGameplayTags;
 
+	UPROPERTY(BlueprintAssignable)
+	FOnActionStateChanged OnActionStarted;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnActionStateChanged OnActionStopped;
 protected:
 
-	// UFUNCTION(Server, Reliable)
-	// void ServerStartAction(AActor* Instigator, FName ActionName);
+	UFUNCTION(Server, Reliable)
+	void ServerStartAction(AActor* Instigator, FName ActionName);
 
-	// UFUNCTION(Server, Reliable)
-	// void ServerStopAction(AActor* Instigator, FName ActionName);
+	UFUNCTION(Server, Reliable)
+	void ServerStopAction(AActor* Instigator, FName ActionName);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastStartAction(AActor* Instigator, FName ActionName);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void MulticastStopAction(AActor* Instigator, FName ActionName);
 
 	UPROPERTY(EditAnywhere, Category = "Actions")
 	TArray<TSubclassOf<UShooterAction>> DefaultActions;

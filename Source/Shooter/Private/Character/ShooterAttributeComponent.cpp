@@ -16,7 +16,6 @@ UShooterAttributeComponent::UShooterAttributeComponent()
 	Health = HealthMax;
 
 	SetIsReplicatedByDefault(true);
-
 }
 
 

@@ -11,6 +11,7 @@
 UShooterAction_Projectile::UShooterAction_Projectile()
 {
     StartPointSocketName = "MuzzleFlash";
+	bAutoStart = false;
     AttackAnimDelay = 0.1f;
 }
 
@@ -63,7 +64,7 @@ void UShooterAction_Projectile::AttackDelay_Elapsed(ACharacter *InstigatorCharac
 		FVector TraceStart = InstigatorCharacter->GetPawnViewLocation();
 
 		// endpoint far into the look-at distance (not too far, still adjust somewhat towards crosshair on a miss)
-		FVector TraceEnd = TraceStart + (InstigatorCharacter->GetControlRotation().Vector() * 5000);
+		FVector TraceEnd = TraceStart + (InstigatorCharacter->GetBaseAimRotation().Vector() * 5000);
 
 		FHitResult Hit;
 		// returns true if we got to a blocking hit

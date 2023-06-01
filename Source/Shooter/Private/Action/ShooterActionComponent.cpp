@@ -10,7 +10,7 @@
 UShooterActionComponent::UShooterActionComponent()
 {
 	
-	PrimaryComponentTick.bCanEverTick = true;
+	SetIsReplicatedByDefault(true);
 
 }
 
@@ -21,19 +21,12 @@ void UShooterActionComponent::BeginPlay()
 
 	for (TSubclassOf<UShooterAction> ActionClass : DefaultActions)
 	{
-		AddAction(ActionClass);
+		AddAction(GetOwner(), ActionClass);
 	}
 	
 }
 
-void UShooterActionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-}
-
-void UShooterActionComponent::AddAction(TSubclassOf<UShooterAction> ActionClass)
+void UShooterActionComponent::AddAction(AActor* Instigator, TSubclassOf<UShooterAction> ActionClass)
 {
 	if (!ensure(ActionClass))
 	{
@@ -44,47 +37,73 @@ void UShooterActionComponent::AddAction(TSubclassOf<UShooterAction> ActionClass)
 	if (ensure(NewAction))
 	{
 		Actions.Add(NewAction);
+
+		if(NewAction->bAutoStart && ensure(NewAction->CanStart(Instigator)))
+		{
+			NewAction->StartAction(Instigator);
+		}
 	}
 }
 
-bool UShooterActionComponent::StartActionByName(AActor *Instigator, FName ActionName)
+void UShooterActionComponent::RemoveAction(UShooterAction* ActionClass)
+{
+	if(!ensure(ActionClass && !ActionClass->IsRunning())){
+		return;
+	}
+
+	Actions.Remove(ActionClass);
+}
+
+void UShooterActionComponent::StartActionByName(AActor *Instigator, FName ActionName)
+{
+	ServerStartAction(Instigator, ActionName);
+}
+
+void UShooterActionComponent::StopActionByName(AActor *Instigator, FName ActionName)
+{
+	ServerStopAction(Instigator, ActionName);
+}
+
+void UShooterActionComponent::ServerStartAction_Implementation(AActor *Instigator, FName ActionName)
 {
 	for (UShooterAction* Action : Actions)
 	{
 		if (Action && Action->ActionName == ActionName)
 		{
+			if(!Action->CanStart(Instigator)){
+				return;
+			}
+
 			D(TEXT(" " + ActionName.ToString() + " "));
 			Action->StartAction(Instigator);
-			return true;
+			return;
 		}
 	}
-
-	return false;
+	// MulticastStartAction(Instigator, ActionName);
 }
 
-bool UShooterActionComponent::StopActionByName(AActor *Instigator, FName ActionName)
+void UShooterActionComponent::ServerStopAction_Implementation(AActor *Instigator, FName ActionName)
 {
 	for (UShooterAction* Action : Actions)
 	{
 		if (Action && Action->ActionName == ActionName)
 		{
-			Action->StopAction(Instigator);
-			return true;
+			if(Action->IsRunning()){
+				Action->StopAction(Instigator);
+				return;
+			}
 		}
 	}
-
-    return false;
+	// MulticastStopAction(Instigator, ActionName);
 }
 
-// void UShooterActionComponent::ServerStartAction(AActor *Instigator, FName ActionName)
-// {
-// 	StartActionByName(Instigator, ActionName);
-// }
+void UShooterActionComponent::MulticastStartAction_Implementation(AActor *Instigator, FName ActionName)
+{
+}
 
-// void UShooterActionComponent::ServerStopAction(AActor *Instigator, FName ActionName)
-// {
-// 	StopActionByName(Instigator, ActionName);
-// }
+void UShooterActionComponent::MulticastStopAction_Implementation(AActor *Instigator, FName ActionName)
+{
+}
 
 void UShooterActionComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty> &OutLifetimeProps) const
 {

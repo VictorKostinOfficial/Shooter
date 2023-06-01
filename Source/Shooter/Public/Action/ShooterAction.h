@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "GameplayTagContainer.h"
 #include "ShooterAction.generated.h"
 
 class UWorld;
@@ -36,13 +37,19 @@ class SHOOTER_API UShooterAction : public UObject
 	
 public:
 
-	// void Initialize(UShooterActionComponent* NewActionComp);
+	void Initialize(UShooterActionComponent* NewActionComp);
 
-	// UFUNCTION(BlueprintCallable, Category = "Action")
-	// bool IsRunning();
+	UPROPERTY(EditDefaultsOnly, Category = "Action")
+	bool bAutoStart;
 
-	// UFUNCTION(BlueprintNativeEvent, Category = "Action")
-	// bool CanStart(AActor* Instigator);
+	UPROPERTY(EditDefaultsOnly, Category = "Action")
+	float CoolDown;
+
+	UFUNCTION(BlueprintNativeEvent, Category = "Action")
+	bool CanStart(AActor* Instigator);
+
+	UFUNCTION(BlueprintCallable, Category = "Action")
+	bool IsRunning() const;
 
 	UFUNCTION(BlueprintNativeEvent, Category = "Action")
 	void StartAction(AActor* Instigator);
@@ -55,28 +62,41 @@ public:
 
 	virtual UWorld* GetWorld() const override;
 
-	// virtual bool IsSupportedForNetworking() const override
-	// {
-	// 	return true;
-	// }
+	virtual bool IsSupportedForNetworking() const override
+	{
+		return true;
+	}
 
 protected:
 
-	// UPROPERTY(Replicated)
-	// TObjectPtr<UShooterActionComponent> ActionComp;
+	// Smth like cool down for ability 
+	UPROPERTY(EditDefaultsOnly, Category = "Tags")
+	FGameplayTagContainer GrantsTags;
 
-	// UFUNCTION(BlueprintCallable, Category = "Action")
-	// UShooterAction* GetOwningComponent() const;
+	// Block ability tag, can use ability when has none of these
+	UPROPERTY(EditDefaultsOnly, Category = "Tags")
+	FGameplayTagContainer BlockedTags;
 
-	// UPROPERTY(ReplicatedUsing="OnRep_RepData")
-	// FActionRepData RepData;
+	UPROPERTY(Replicated)
+	TObjectPtr<UShooterActionComponent> ActionComp;
 
-	// UPROPERTY(Replicated)
-	// float TimeStarted;
+	UFUNCTION(BlueprintCallable, Category = "Action")
+	UShooterActionComponent* GetOwningComponent() const;
 
-	// UFUNCTION()
-	// void OnRep_RepData();
+	UPROPERTY(ReplicatedUsing="OnRep_RepData")
+	FActionRepData RepData;
 
-	// void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	FTimerHandle CoolDownDurationHandle;
+
+	UFUNCTION()
+	void CoolDownDuration_Elapsed();
+
+	UPROPERTY(Replicated)
+	float TimeStarted;
+
+	UFUNCTION()
+	void OnRep_RepData();
+
+	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 };

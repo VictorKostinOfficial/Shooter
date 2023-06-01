@@ -16,7 +16,9 @@ public class Shooter : ModuleRules
 				"InputCore", 
 				"UMG", 
 				"MultiplayerSessions",  
-				"EnhancedInput"
+				"EnhancedInput",
+				"HoudiniEngine",
+				"GameplayTags",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

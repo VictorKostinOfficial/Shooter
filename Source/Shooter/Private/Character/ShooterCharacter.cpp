@@ -92,7 +92,7 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	APlayerController* PlayerControl = Cast<APlayerController>(GetController());
-	UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerControl->GetLocalPlayer()); // That works
+	UEnhancedInputLocalPlayerSubsystem* InputSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerControl->GetLocalPlayer());
 	InputSystem->ClearAllMappings();
 	InputSystem->AddMappingContext(InputMapping.LoadSynchronous(), 0);
 
@@ -102,8 +102,8 @@ void AShooterCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	Input->BindAction(InputJump.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::Jump);
 	Input->BindAction(InputInteraction.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::PrimaryInteract);
 
-	Input->BindAction(InputCrouch.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::CrouchButtonIsPressed);		// Pressed
-	Input->BindAction(InputCrouch.LoadSynchronous(), ETriggerEvent::Completed, this, &AShooterCharacter::UncrouchButtonIsReleased);	// Released
+	Input->BindAction(InputCrouch.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::CrouchButtonIsPressed);		
+	Input->BindAction(InputCrouch.LoadSynchronous(), ETriggerEvent::Completed, this, &AShooterCharacter::UncrouchButtonIsReleased);
 
 	Input->BindAction(InputAiming.LoadSynchronous(), ETriggerEvent::Started, this, &AShooterCharacter::AimingButtonIsPressed);
 	Input->BindAction(InputAiming.LoadSynchronous(), ETriggerEvent::Completed, this, &AShooterCharacter::AimingButtonIsReleased);
@@ -155,18 +155,18 @@ ETurningInPlace AShooterCharacter::GetTurningInPlace()
 }
 
 
-void AShooterCharacter::Jump()
-{
-	Super::Jump();
-}
-
-
 void AShooterCharacter::PrimaryInteract()
 {
 	if (InteractionComponent)
 	{
 		InteractionComponent->PrimaryInteract();
 	}
+}
+
+
+void AShooterCharacter::Jump()
+{
+	Super::Jump();
 }
 
 
