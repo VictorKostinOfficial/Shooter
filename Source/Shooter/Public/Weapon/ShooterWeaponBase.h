@@ -24,7 +24,6 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "_Weapon")
 	FName MuzzleSocketName;
 
-
 	// WeaponInterface
 	FName GetSocketName_Implementation();
 
@@ -39,6 +38,7 @@ public:
 
 
 	// InteractionInterface
+	UFUNCTION(BlueprintCallable)
 	void Interact_Implementation(APawn* InstigatorPawn);
 
 protected:
@@ -48,6 +48,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "_Weapon")
 	TObjectPtr<UAnimationAsset> FireAnimation;
+
+	UPROPERTY(EditAnywhere, Category = "_Weapon")
+	float FireDelay;
 
 	UPROPERTY(ReplicatedUsing = OnRep_WeaponState, VisibleAnywhere, Category = "_Weapon")
 	EWeaponState WeaponState;

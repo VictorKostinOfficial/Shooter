@@ -51,6 +51,8 @@ public:
 
 	void PlayFireMontage(bool bIsAiming);
 
+	FVector GetHitTarget() const;
+
 protected:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

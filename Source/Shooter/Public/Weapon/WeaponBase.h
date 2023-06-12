@@ -44,8 +44,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "_Weapon")
 	int AmmoCurrent;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "_Weapon")
-	float ShootDelay;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "_Weapon")
 	float ReloadDelay;

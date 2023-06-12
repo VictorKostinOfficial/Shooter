@@ -15,13 +15,15 @@
 UShooterWeaponComponent::UShooterWeaponComponent()
 {
 
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 	SetIsReplicatedByDefault(true);
 
 	TurningInPlace = ETurningInPlace::ETIP_None;
 
 	SockedNameToAttach = "hand_rSocket";
 	bIsAiming = false;
+	bCanShooting = true;
+	FireDelay = 0.15f;
 
 	// Character = Cast<ACharacter>(GetOwner());
 	AimWalkSpeed = 450.f;
@@ -35,6 +37,21 @@ void UShooterWeaponComponent::BeginPlay()
 	BaseWalkSpeed = Character->GetCharacterMovement()->MaxWalkSpeed;
 }
 
+void UShooterWeaponComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction *ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if(Character && Character->IsLocallyControlled()){
+		FHitResult HitResult;
+		TraceUnderCrosshairs(HitResult);
+		if(HitResult.bBlockingHit){
+			HitTarget = HitResult.ImpactPoint;
+		}
+		else{
+			HitTarget = EndTrace;
+		}
+	}
+}
 
 void UShooterWeaponComponent::AimOffset(float DeltaTime)
 {
@@ -126,13 +143,45 @@ void UShooterWeaponComponent::SetIsShooting(bool Value)
 
 	if (bIsShooting)
 	{
-		FHitResult TraceHit;
-		TraceCenter(TraceHit);
+		if(bCanShooting){
+			FireTimerFinished();
+			bCanShooting = false;
+			StartFireTimer();
+		}
+		// FHitResult TraceHit;
+		// TraceCenter(TraceHit);
 
-		Server_Shoot(Value, TraceHit.ImpactPoint);
+		// Server_Shoot(Value, TraceHit.ImpactPoint);
 	}
 }
 
+void UShooterWeaponComponent::StartFireTimer()
+{
+	if(EquippedWeapon == nullptr || Character == nullptr) return;
+	Character->GetWorldTimerManager().SetTimer(
+		FireTimer,
+		this,
+		&UShooterWeaponComponent::FireTimerFinished,
+		FireDelay,
+		true
+	);
+}
+
+void UShooterWeaponComponent::FireTimerFinished()
+{
+	bCanShooting = true;
+	if(bIsShooting){
+		FHitResult TraceHit;
+		TraceCenter(TraceHit);
+
+		Server_Shoot(bIsShooting, TraceHit.ImpactPoint);
+		bCanShooting = false;
+	}
+	else{
+		Character->GetWorldTimerManager().ClearTimer(FireTimer);
+	}
+
+}
 
 void UShooterWeaponComponent::Server_Shoot_Implementation(bool Value, const FVector_NetQuantize TraceHit)
 {
@@ -175,7 +224,7 @@ void UShooterWeaponComponent::TraceCenter(FHitResult& TraceHitResult)
 
 		GetWorld()->LineTraceSingleByChannel(
 			TraceHitResult,
-			CrosshairWorldPosition,
+			CrosshairWorldPosition + CrosshairWorldDirection * 700.f,
 			End,
 			ECollisionChannel::ECC_Visibility,
 			Params
@@ -266,6 +315,10 @@ bool UShooterWeaponComponent::ApplyWeapon(AActor *NewWeapon)
 	
 	if (GetOwner()->HasAuthority())
 	{
+		if(EquippedWeapon){
+			Drop();
+			EquippedWeapon->Destroy();
+		}
 		EquippedWeapon = NewWeapon;	
 		EquippedWeapon->AttachToComponent(Character->GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SockedNameToAttach);
 		EquippedWeapon->SetOwner(Character);
@@ -328,6 +381,46 @@ bool UShooterWeaponComponent::GetIsAiming()
 	return bIsAiming;
 }
 
+void UShooterWeaponComponent::TraceUnderCrosshairs(FHitResult &TraceHitResult)
+{
+	FVector2D ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+
+	FVector2D CrosshairLocation(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirection;
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
+		UGameplayStatics::GetPlayerController(this, 0),
+		CrosshairLocation,
+		CrosshairWorldPosition,
+		CrosshairWorldDirection
+	);
+
+	if (bScreenToWorld)
+	{
+		FVector Start = CrosshairWorldPosition;
+
+		if (Character)
+		{
+			float DistanceToCharacter = (Character->GetActorLocation() - Start).Size();
+			Start += CrosshairWorldDirection * (DistanceToCharacter + 100.f);
+		}
+
+		EndTrace = Start + CrosshairWorldDirection * 5000;
+
+		GetWorld()->LineTraceSingleByChannel(
+			TraceHitResult,
+			Start,
+			EndTrace,
+			ECollisionChannel::ECC_Visibility
+		);
+
+
+	}
+}
 
 void UShooterWeaponComponent::SetIsAiming(bool Value)
 {

@@ -17,11 +17,12 @@ class SHOOTER_API IShooterInteractionInterface
 
 public:
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void Interact(APawn* InstigatorPawn);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	FText GetInteractText(APawn* InstigatorPawn);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void Interact(APawn* InstigatorPawn);
 };
 
 

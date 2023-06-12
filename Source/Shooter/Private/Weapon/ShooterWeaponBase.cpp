@@ -13,6 +13,7 @@ AShooterWeaponBase::AShooterWeaponBase()
 
 	PrimaryActorTick.bCanEverTick = false;
 	bReplicates = true;
+	FireDelay = 0.2f;
 
 	WeaponMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMesh"));
 	WeaponMesh->SetupAttachment(RootComponent);
@@ -90,7 +91,6 @@ void AShooterWeaponBase::Interact_Implementation(APawn *InstigatorPawn)
 	}
 
 }
-
 
 void AShooterWeaponBase::OnRep_WeaponState()
 {

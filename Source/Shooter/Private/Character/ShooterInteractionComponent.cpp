@@ -95,7 +95,7 @@ void UShooterInteractionComponent::FindBestInteractable()
 		}
 	}
 
-	DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
+	// DrawDebugLine(GetWorld(), EyeLocation, End, LineColor, false, 2.0f, 0, 2.0f);
 }
 
 void UShooterInteractionComponent::ServerInteract_Implementation(AActor *InFocus)

@@ -17,7 +17,7 @@ public class Shooter : ModuleRules
 				"UMG", 
 				"MultiplayerSessions",  
 				"EnhancedInput",
-				"HoudiniEngine",
+				// "HoudiniEngine",
 				"GameplayTags",
 		});
 

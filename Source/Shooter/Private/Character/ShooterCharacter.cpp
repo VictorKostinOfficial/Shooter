@@ -258,6 +258,12 @@ void AShooterCharacter::PlayFireMontage(bool bIsAiming)
 	}
 }
 
+FVector AShooterCharacter::GetHitTarget() const
+{
+	if(!WeaponComponent) return FVector();
+	return WeaponComponent->HitTarget;
+}
+
 
 bool AShooterCharacter::IsWeaponEquipped()
 {
@@ -323,6 +329,7 @@ void AShooterCharacter::OnPlayerDead(AActor * InstigatorActor, UShooterAttribute
 	if (IsWeaponEquipped())
 	{
 		WeaponComponent->Drop();
+		WeaponComponent->EquippedWeapon->Destroy();
 	}
 
 

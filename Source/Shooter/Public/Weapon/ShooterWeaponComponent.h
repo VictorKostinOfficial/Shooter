@@ -85,6 +85,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "_Weapon")
 	bool bIsShooting;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "_Weapon")
+	bool bCanShooting;
+
 	UPROPERTY(VisibleAnywhere)
 	float AO_Yaw;
 
@@ -94,11 +97,16 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	float InterpAO_Yaw;
 
+	FVector EndTrace;
+	FVector HitTarget;
+
 	UPROPERTY(VisibleAnywhere)
 	FRotator AimRotation;
 
 	UPROPERTY(VisibleAnywhere)
 	ETurningInPlace TurningInPlace;
+
+	void TraceUnderCrosshairs(FHitResult& TraceHitResult);
 
 
 
@@ -138,11 +146,21 @@ protected:
 	// UFUNCTION(NetMulticast, Reliable)
 	// void Multicast_WeaponChanged(AActor* InstigatorActor, AActor* NewWeapon);
 
+	FTimerHandle FireTimer;
+
+	UPROPERTY(EditANywhere, Category = Combat)
+	float FireDelay;
+
+	void StartFireTimer();
+	void FireTimerFinished();
+
 public:	
 
 	UShooterWeaponComponent();
 
 	virtual void BeginPlay() override;
+
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
